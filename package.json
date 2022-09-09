@@ -1,0 +1,12 @@
+{
+  "name": "fdtrie",
+  "version": "1.0.0",
+  "description": "Persistent data structures with fast diffing",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mode89/fdtrie-js.git"
+  },
+  "author": "Andrey Krainyak",
+  "license": "MIT",
+  "homepage": "https://github.com/mode89/fdtrie-js"
+}
