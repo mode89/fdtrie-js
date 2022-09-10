@@ -92,64 +92,57 @@ describe("assoc", () => {
     })
 })
 
-// 
-// @Test
-// fun getEntry_Entry_Same() {
-//     assertEquals(Entry(1, 1, 1), getEntry(Entry(1, 1, 1), 0, 1, 1))
-// }
-// 
-// @Test
-// fun getEntry_Entry_WrongKey() {
-//     assertNull(getEntry(Entry(1, 1, 1), 0, 1, 2))
-// }
-// 
-// @Test
-// fun getEntry_Entry_WrongKeyAndHash() {
-//     assertNull(getEntry(Entry(1, 1, 1), 0, 2, 2))
-//     assertNull(getEntry(Entry(1, 1, 1), 0, 2, 1))
-// }
-// 
-// @Test
-// fun getEntry_CollisionNode() {
-//     assertEquals(
-//         Entry(1, 2, 2),
-//         getEntry(
-//             makeCollisionNode(Entry(1, 1, 1), Entry(1, 2, 2)),
-//             0, 1, 2))
-// }
-// 
-// @Test
-// fun getEntry_CollisionNode_WrongKeyHash() {
-//     assertNull(
-//         getEntry(
-//             makeCollisionNode(Entry(1, 1, 1), Entry(1, 2, 2)),
-//             0, 2, 3))
-// }
-// 
-// @Test
-// fun getEntry_CollisionNode_WrongKey() {
-//     assertNull(
-//         getEntry(
-//             makeCollisionNode(Entry(1, 1, 1), Entry(1, 2, 2)),
-//             0, 1, 3))
-// }
-// 
-// @Test
-// fun getEntry_ArrayNode() {
-//     assertEquals(
-//         Entry(2, 2, 2),
-//         getEntry(
-//             makeArrayNodeOf(Entry(1, 1, 1), Entry(2, 2, 2)),
-//             0, 2, 2))
-// }
-// 
-// @Test
-// fun getEntry_ArrayNode_NotFound() {
-//     assertNull(
-//         getEntry(
-//             makeArrayNodeOf(Entry(1, 1, 1), Entry(2, 2, 2)),
-//             0, 3, 3))
-// }
+describe("getEntry", () => {
+    describe("Entry", () => {
+        test("hit", () => {
+            const e = new Entry(1, 1, 1)
+            expect(e.getEntry(0, 1, 1)).toBe(e);
+        })
+        test("wrong key", () => {
+            expect(new Entry(1, 1, 1).getEntry(0, 1, 2)).toBeUndefined();
+        })
+        test("wrong key and hash", () => {
+            const e = new Entry(1, 1, 1);
+            expect(e.getEntry(0, 2, 2)).toBeUndefined();
+            expect(e.getEntry(0, 2, 1)).toBeUndefined();
+        })
+    })
+    describe("CollisionNode", () => {
+        test("hit", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(1, 2, 2);
+            const c = makeCollisionNode(e1, e2);
+            expect(c.getEntry(0, 1, 2)).toBe(e2);
+        })
+        test("wrong hash", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(1, 2, 2);
+            const c = makeCollisionNode(e1, e2);
+            expect(c.getEntry(0, 2, 3)).toBeUndefined();
+        })
+        test("wrong key", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(1, 2, 2);
+            const c = makeCollisionNode(e1, e2);
+            expect(c.getEntry(0, 1, 3)).toBeUndefined();
+        })
+    })
+    describe("ArrayNode", () => {
+        test("hit", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(2, 2, 2);
+            const a = makeArrayNodeOf(e1, e2);
+            expect(a.getEntry(0, 2, 2)).toBe(e2);
+        })
+        test("not found", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(2, 2, 2);
+            const a = makeArrayNodeOf(e1, e2);
+            expect(a.getEntry(0, 3, 3)).toBeUndefined();
+        })
+    })
+})
+
 // 
 // @Test
 // fun dissocEntry_SameKeyAndHash() {

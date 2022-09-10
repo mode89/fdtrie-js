@@ -26,6 +26,14 @@ export class Entry {
             }
         }
     }
+
+    getEntry(shift, keyHash, key) {
+        if (this.keyHash == keyHash && utils.is(this.key, key)) {
+            return this;
+        } else {
+            return undefined;
+        }
+    }
 }
 
 export class ArrayNode {
@@ -43,7 +51,7 @@ export class ArrayNode {
     assoc(shift, entry) {
         const childIndex = arrayIndex(shift, entry.keyHash);
         const child = this.children[childIndex];
-        if (child == null) {
+        if (child === undefined) {
             return new ArrayNode(
                 utils.immArraySet(this.children, childIndex, entry),
                 this.childrenCount + 1,
@@ -60,6 +68,16 @@ export class ArrayNode {
                         + newChild.countEntries()
                         - child.countEntries());
             }
+        }
+    }
+
+    getEntry(shift, keyHash, key) {
+        const childIndex = arrayIndex(shift, keyHash);
+        const child = this.children[childIndex];
+        if (child !== undefined) {
+            return child.getEntry(shift + 5, keyHash, key);
+        } else {
+            return undefined;
         }
     }
 }
@@ -97,29 +115,16 @@ export class CollisionNode {
             return makeArrayNode(this, shift).assoc(shift, entry);
         }
     }
+
+    getEntry(shift, keyHash, key) {
+        if (this.keyHash === keyHash) {
+            return this.children.find(it => utils.is(it.key, key));
+        } else {
+            return undefined;
+        }
+    }
 }
 
-// 
-// fun getEntry(node: Any, shift: Int, keyHash: Int, key: Any?): Entry? {
-//     return when (node) {
-//         is ArrayNode -> {
-//             val childIndex = arrayIndex(shift, keyHash)
-//             val child = node.children[childIndex]
-//             if (child != null)
-//                 getEntry(child, shift + 5, keyHash, key)
-//             else null
-//         }
-//         is Entry ->
-//             if (node.keyHash == keyHash && node.key == key)
-//                 node
-//             else null
-//         is CollisionNode ->
-//             if (node.keyHash == keyHash)
-//                 node.children.firstOrNull { it.key == key }
-//             else null
-//         else -> throw UnsupportedOperationException()
-//     }
-// }
 // 
 // fun dissoc(node: Any, shift: Int, keyHash: Int, key: Any?): Any? {
 //     return when (node) {
