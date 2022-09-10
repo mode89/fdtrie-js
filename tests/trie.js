@@ -190,84 +190,69 @@ describe("dissoc", () => {
             expect(c2.getEntry(0, 1, 3)).toBe(e3);
         })
     })
-// 
-// @Test
-// fun dissocArrayNode_Unchanged() {
-//     val a = makeArrayNodeOf(Entry(1, 1, 1), Entry(2, 2, 2))
-//     assertTrue(dissoc(a, 0, 3, 3) === a)
-// }
-// 
-// @Test
-// fun dissocArrayNode_UnchangedChild() {
-//     val a = makeArrayNodeOf(Entry(1, 1, 1), Entry(2, 2, 2))
-//     assertTrue(dissoc(a, 0, 33, 3) === a)
-// }
-// 
-// @Test
-// fun dissocArrayNode_NewArrayNode() {
-//     val a = dissoc(
-//         makeArrayNodeOf(
-//             Entry(1, 1, 1),
-//             Entry(2, 2, 2),
-//             Entry(3, 3, 3)),
-//         0, 2, 2) as ArrayNode
-//     assertEquals(2, a.childrenCount)
-//     assertEquals(2, a.entryCount)
-//     assertEquals(Entry(1, 1, 1), getEntry(a, 0, 1, 1))
-//     assertNull(getEntry(a, 0, 2, 2))
-//     assertEquals(Entry(3, 3, 3), getEntry(a, 0, 3, 3))
-// }
-// 
-// @Test
-// fun dissocArrayNode_ReturnLastChild() {
-//     val e = Entry(1, 1, 1)
-//     val a = makeArrayNodeOf(e, Entry(2, 2, 2))
-//     assertTrue(dissoc(a, 0, 2, 2) === e)
-// }
-// 
-// @Test
-// fun dissocArrayNode_LastChildHasHigherIndex() {
-//     val e = Entry(1, 1, 1)
-//     val a = makeArrayNodeOf(e, Entry(0, 0, 0))
-//     assertTrue(dissoc(a, 0, 0, 0) === e)
-// }
-// 
-// @Test
-// fun dissocArrayNode_LastChildIsArrayNode() {
-//     val a = dissoc(
-//         makeArrayNodeOf(
-//             Entry(1, 1, 1),
-//             Entry(2, 2, 2),
-//             Entry(33, 3, 3)),
-//         0, 2, 2) as ArrayNode
-//     assertEquals(1, a.childrenCount)
-//     assertEquals(2, a.entryCount)
-//     assertEquals(Entry(1, 1, 1), getEntry(a, 0, 1, 1))
-//     assertNull(getEntry(a, 0, 2, 2))
-//     assertEquals(Entry(33, 3, 3), getEntry(a, 0, 33, 3))
-// }
-// 
-// @Test
-// fun dissocArrayNode_NewChildIsArrayNode() {
-//     val a = dissoc(
-//         makeArrayNodeOf(
-//             Entry(1, 1, 1),
-//             Entry(33, 2, 2),
-//             Entry(65, 3, 3)),
-//         0, 33, 2) as ArrayNode
-//     assertEquals(1, a.childrenCount)
-//     assertEquals(2, a.entryCount)
-//     assertEquals(Entry(1, 1, 1), getEntry(a, 0, 1, 1))
-//     assertNull(getEntry(a, 0, 33, 2))
-//     assertEquals(Entry(65, 3, 3), getEntry(a, 0, 65, 3))
-// }
-// 
-// @Test
-// fun dissocArrayNode_ReturnNewChild() {
-//     val e = Entry(1, 1, 1)
-//     val a = makeArrayNodeOf(e, Entry(33, 3, 3))
-//     assertTrue(dissoc(a, 0, 33, 3) === e)
-// }
+    describe("ArrayNode", () => {
+        test("unchanged", () => {
+            const a = makeArrayNodeOf(
+                new Entry(1, 1, 1), new Entry(2, 2, 2));
+            expect(a.dissoc(0, 3, 3)).toBe(a);
+        })
+        test("unchagned child", () => {
+            const a = makeArrayNodeOf(
+                new Entry(1, 1, 1), new Entry(2, 2, 2));
+            expect(a.dissoc(0, 33, 3)).toBe(a);
+        })
+        test("new array node", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(2, 2, 2);
+            const e3 = new Entry(3, 3, 3);
+            const a = makeArrayNodeOf(e1, e2, e3).dissoc(0, 2, 2);
+            expect(a).toBeInstanceOf(ArrayNode);
+            expect(a.childrenCount).toBe(2);
+            expect(a.entryCount).toBe(2);
+            expect(a.getEntry(0, 1, 1)).toBe(e1);
+            expect(a.getEntry(0, 2, 2)).toBeUndefined();
+            expect(a.getEntry(0, 3, 3)).toBe(e3);
+        })
+        test("return last child", () => {
+            const e = new Entry(1, 1, 1);
+            const a = makeArrayNodeOf(e, new Entry(2, 2, 2));
+            expect(a.dissoc(0, 2, 2)).toBe(e);
+        })
+        test("last child has higher index", () => {
+            const e = new Entry(1, 1, 1);
+            const a = makeArrayNodeOf(e, new Entry(0, 0, 0));
+            expect(a.dissoc(0, 0, 0)).toBe(e);
+        })
+        test("last child is array node", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(2, 2, 2);
+            const e3 = new Entry(33, 3, 3);
+            const a = makeArrayNodeOf(e1, e2, e3).dissoc(0, 2, 2);
+            expect(a).toBeInstanceOf(ArrayNode);
+            expect(a.childrenCount).toBe(1);
+            expect(a.entryCount).toBe(2);
+            expect(a.getEntry(0, 1, 1)).toBe(e1);
+            expect(a.getEntry(0, 2, 2)).toBeUndefined();
+            expect(a.getEntry(0, 33, 3)).toBe(e3);
+        })
+        test("new child is array node", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(33, 2, 2);
+            const e3 = new Entry(65, 3, 3);
+            const a = makeArrayNodeOf(e1, e2, e3).dissoc(0, 33, 2);
+            expect(a).toBeInstanceOf(ArrayNode);
+            expect(a.childrenCount).toBe(1);
+            expect(a.entryCount).toBe(2);
+            expect(a.getEntry(0, 1, 1)).toBe(e1);
+            expect(a.getEntry(0, 33, 2)).toBeUndefined();
+            expect(a.getEntry(0, 65, 3)).toBe(e3);
+        })
+        test("return new child", () => {
+            const e = new Entry(1, 1, 1);
+            const a = makeArrayNodeOf(e, new Entry(33, 3, 3));
+            expect(a.dissoc(0, 33, 3)).toBe(e);
+        })
+    })
 })
 
 // 

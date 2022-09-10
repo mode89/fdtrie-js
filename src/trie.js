@@ -88,6 +88,58 @@ export class ArrayNode {
             return undefined;
         }
     }
+
+    dissoc(shift, keyHash, key) {
+        const childIndex = arrayIndex(shift, keyHash);
+        const child = this.children[childIndex];
+        if (child !== undefined) {
+            const newChild = child.dissoc(shift + 5, keyHash, key);
+            if (child === newChild) {
+                return this;
+            } else {
+                const newChildrenCount = (newChild !== undefined)
+                    ? this.childrenCount
+                    : (this.childrenCount - 1);
+
+                if (newChildrenCount == 0) {
+                    throw "If no children left, that means the ArrayNode "
+                        + "had only one entry undef it, which isn't allowed";
+                } else {
+                    // If only one child left and it isn't an ArrayNode,
+                    // we should return this child, instead
+                    if (newChildrenCount == 1) {
+                        if (newChild !== undefined) {
+                            var returnChild = newChild instanceof ArrayNode
+                                ? undefined
+                                : newChild;
+                        } else {
+                            // Should always succeed, because ArrayNode must
+                            // have at least two entries under it
+                            const lastChild = this.children
+                                .find(it => it !== undefined && it !== child);
+                            var returnChild = lastChild instanceof ArrayNode
+                                ? undefined
+                                : lastChild;
+                        }
+                    } else {
+                        var returnChild = undefined;
+                    }
+
+                    if (returnChild == undefined) {
+                        return new ArrayNode(
+                            utils.immArraySet(
+                                this.children, childIndex, newChild),
+                            newChildrenCount,
+                            this.entryCount - 1);
+                    } else {
+                        return returnChild;
+                    }
+                }
+            }
+        } else {
+            return this;
+        }
+    }
 }
 
 export class CollisionNode {
@@ -155,69 +207,6 @@ export class CollisionNode {
     }
 }
 
-// 
-// fun dissoc(node: Any, shift: Int, keyHash: Int, key: Any?): Any? {
-//     return when (node) {
-//         is ArrayNode -> dissocArrayNode(node, shift, keyHash, key)
-//         is Entry -> dissocEntry(node, keyHash, key)
-//         is CollisionNode -> dissocCollisionNode(node, keyHash, key)
-//         else -> throw UnsupportedOperationException()
-//     }
-// }
-// 
-// private fun dissocArrayNode(
-//         node: ArrayNode,
-//         shift: Int,
-//         keyHash: Int,
-//         key: Any?): Any {
-//     val childIndex = arrayIndex(shift, keyHash)
-//     val child = node.children[childIndex]
-//     return if (child != null) {
-//         val newChild = dissoc(child, shift + 5, keyHash, key)
-//         if (child == newChild) {
-//             node
-//         } else {
-//             val newChildrenCount = if (newChild != null) {
-//                 node.childrenCount
-//             } else {
-//                 node.childrenCount - 1
-//             }
-// 
-//             if (newChildrenCount == 0) {
-//                 throw UnsupportedOperationException(
-//                     "If no children left, that means the ArrayNode had "
-//                     + "only one entry under it, which isn't allowed")
-//             } else {
-//                 // If only one child left and it isn't an ArrayNode,
-//                 // we should return this child, instead
-//                 val returnChild = if (newChildrenCount == 1) {
-//                     if (newChild != null) {
-//                         if (newChild is ArrayNode) null else newChild
-//                     } else {
-//                         // Should always succeed, because ArrayNode must
-//                         // have at least two entries under it
-//                         val lastChild = node.children.first(
-//                             { it != null && it != child })
-//                         if (lastChild is ArrayNode) null else lastChild
-//                     }
-//                 } else {
-//                     null
-//                 }
-// 
-//                 if (returnChild == null) {
-//                     ArrayNode(
-//                         node.children.immSet(childIndex, newChild),
-//                         newChildrenCount,
-//                         node.entryCount - 1)
-//                 } else {
-//                     returnChild
-//                 }
-//             }
-//         }
-//     } else {
-//         node
-//     }
-// }
 // 
 // fun difference(lNode: Any?, rNode: Any?, shift: Int): Any? {
 //     return if (lNode === rNode) {
