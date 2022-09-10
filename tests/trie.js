@@ -158,35 +158,38 @@ describe("dissoc", () => {
             expect(e.dissoc(0, 2, 1)).toBe(e);
         })
     })
-// 
-// @Test
-// fun dissocCollisionNode_WrongHash() {
-//     val c = makeCollisionNode(Entry(1, 1, 1), Entry(1, 2, 2))
-//     assertTrue(dissoc(c, 0, 2, 1) === c)
-// }
-// 
-// @Test
-// fun dissocCollisionNode_WrongKey() {
-//     val c = makeCollisionNode(Entry(1, 1, 1), Entry(1, 2, 2))
-//     assertTrue(dissoc(c, 0, 1, 3) === c)
-// }
-// 
-// @Test
-// fun dissocCollisionNode_ReturnEntry() {
-//     val c = makeCollisionNode(Entry(1, 1, 1), Entry(1, 2, 2))
-//     assertEquals(Entry(1, 1, 1), dissoc(c, 0, 1, 2))
-// }
-// 
-// @Test
-// fun dissocCollisionNode_NewCollisionNode() {
-//     val c = makeCollisionNode(
-//         Entry(1, 1, 1),
-//         Entry(1, 2, 2),
-//         Entry(1, 3, 3))
-//     assertEquals(
-//         makeCollisionNode(Entry(1, 2, 2), Entry(1, 3, 3)),
-//         dissoc(c, 0, 1, 1))
-// }
+    describe("CollisionNode", () => {
+        test("wrong hash", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(1, 2, 2);
+            const c = makeCollisionNode(e1, e2);
+            expect(c.dissoc(0, 2, 1)).toBe(c);
+        })
+        test("wrong key", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(1, 2, 2);
+            const c = makeCollisionNode(e1, e2);
+            expect(c.dissoc(0, 1, 3)).toBe(c);
+        })
+        test("return entry", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(1, 2, 2);
+            const c = makeCollisionNode(e1, e2);
+            expect(c.dissoc(0, 1, 2)).toBe(e1);
+        })
+        test("new collision node", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(1, 2, 2);
+            const e3 = new Entry(1, 3, 3);
+            const c1 = makeCollisionNode(e1, e2, e3);
+            const c2 = c1.dissoc(0, 1, 1);
+            expect(c2).toBeInstanceOf(CollisionNode);
+            expect(c2.keyHash).toBe(1);
+            expect(c2.children.length).toBe(2);
+            expect(c2.getEntry(0, 1, 2)).toBe(e2);
+            expect(c2.getEntry(0, 1, 3)).toBe(e3);
+        })
+    })
 // 
 // @Test
 // fun dissocArrayNode_Unchanged() {

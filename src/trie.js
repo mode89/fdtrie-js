@@ -131,6 +131,28 @@ export class CollisionNode {
             return undefined;
         }
     }
+
+    dissoc(shift, keyHash, key) {
+        if (this.keyHash != keyHash) {
+            return this;
+        } else {
+            const childIndex = this.children
+                .findIndex(ch => utils.is(ch.key, key));
+            if (childIndex == -1) {
+                return this;
+            } else {
+                if (this.children.length > 2) {
+                    return new CollisionNode(
+                        utils.immArrayRemove(this.children, childIndex),
+                        keyHash);
+                } else {
+                    // Should always succeed, because CollisionNode must
+                    // have at least two children
+                    return this.children.find(ch => !utils.is(ch.key, key))
+                }
+            }
+        }
+    }
 }
 
 // 
@@ -194,30 +216,6 @@ export class CollisionNode {
 //         }
 //     } else {
 //         node
-//     }
-// }
-// 
-// private fun dissocCollisionNode(
-//         node: CollisionNode,
-//         keyHash: Int,
-//         key: Any?): Any {
-//     return if (node.keyHash != keyHash) {
-//         node
-//     } else {
-//         val childIndex = node.children.indexOfFirst { it.key == key }
-//         if (childIndex == -1) {
-//             node
-//         } else {
-//             if (node.children.size > 2) {
-//                 CollisionNode(
-//                     node.children.immRemoveAt(childIndex),
-//                     keyHash)
-//             } else {
-//                 // Should always succeed, because CollisionNode must have
-//                 // at least two children
-//                 node.children.first { it.key != key }
-//             }
-//         }
 //     }
 // }
 // 
@@ -542,10 +540,3 @@ export function makeArrayNode(node, shift) {
 function arrayIndex(shift, keyHash) {
     return (keyHash >>> shift) & 0x1F;
 }
-
-// 
-// private fun <T> List<T>.immRemoveAt(i: Int): List<T> {
-//     val arr = ArrayList(this)
-//     arr.removeAt(i)
-//     return arr
-// }

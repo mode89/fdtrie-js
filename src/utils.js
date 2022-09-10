@@ -13,3 +13,9 @@ export function immArrayAdd(arr, x) {
     newArr.push(x);
     return newArr;
 }
+
+export function immArrayRemove(arr, i) {
+    const newArr = [...arr];
+    newArr.splice(i, 1);
+    return newArr;
+}
