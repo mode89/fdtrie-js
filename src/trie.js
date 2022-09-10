@@ -34,6 +34,14 @@ export class Entry {
             return undefined;
         }
     }
+
+    dissoc(shift, keyHash, key) {
+        if (this.keyHash == keyHash && utils.is(this.key, key)) {
+            return undefined;
+        } else {
+            return this;
+        }
+    }
 }
 
 export class ArrayNode {
@@ -184,17 +192,6 @@ export class CollisionNode {
 //                 }
 //             }
 //         }
-//     } else {
-//         node
-//     }
-// }
-// 
-// private fun dissocEntry(
-//         node: Entry,
-//         keyHash: Int,
-//         key: Any?): Any? {
-//     return if (node.keyHash == keyHash && node.key == key) {
-//         null
 //     } else {
 //         node
 //     }

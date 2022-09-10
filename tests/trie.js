@@ -143,22 +143,21 @@ describe("getEntry", () => {
     })
 })
 
-// 
-// @Test
-// fun dissocEntry_SameKeyAndHash() {
-//     assertNull(dissoc(Entry(1, 1, 1), 0, 1, 1))
-// }
-// 
-// @Test
-// fun dissocEntry_DiffKey() {
-//     val e = Entry(1, 1, 1)
-//     assertTrue(dissoc(e, 0, 1, 2) === e)
-// }
-// 
-// @Test
-// fun dissocEntry_WrongHash() {
-//     assertEquals(Entry(1, 1, 1), dissoc(Entry(1, 1, 1), 0, 2, 1))
-// }
+describe("dissoc", () => {
+    describe("Entry", () => {
+        test("same key and hash", () => {
+            const e = new Entry(1, 1, 1);
+            expect(e.dissoc(0, 1, 1)).toBeUndefined();
+        })
+        test("wrong key", () => {
+            const e = new Entry(1, 1, 1);
+            expect(e.dissoc(0, 1, 2)).toBe(e);
+        })
+        test("wrong hash", () => {
+            const e = new Entry(1, 1, 1);
+            expect(e.dissoc(0, 2, 1)).toBe(e);
+        })
+    })
 // 
 // @Test
 // fun dissocCollisionNode_WrongHash() {
@@ -266,6 +265,8 @@ describe("getEntry", () => {
 //     val a = makeArrayNodeOf(e, Entry(33, 3, 3))
 //     assertTrue(dissoc(a, 0, 33, 3) === e)
 // }
+})
+
 // 
 // @Test
 // fun differenceNull() {
