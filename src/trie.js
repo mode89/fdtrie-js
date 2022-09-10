@@ -1,8 +1,24 @@
 import * as utils from "utils.js"
 
-export class Entry {
+class Node {
+
+    difference(other, shift) {
+        if (this === other) {
+            return null;
+        } else {
+            if (other !== null) {
+                return this.differenceImpl(other, shift);
+            } else {
+                return this;
+            }
+        }
+    }
+}
+
+export class Entry extends Node {
 
     constructor(keyHash, key, value) {
+        super();
         this.keyHash = keyHash;
         this.key = key;
         this.value = value;
@@ -42,11 +58,33 @@ export class Entry {
             return this;
         }
     }
+
+    differenceImpl(other, shift) {
+        if (other instanceof Entry) {
+            if (utils.is(this.key, other.key) &&
+                utils.is(this.value, other.value)) {
+                return null;
+            } else {
+                return this;
+            }
+        } else {
+            const otherE = other.getEntry(shift, this.keyHash, this.key);
+            if (otherE === undefined) {
+                return this;
+            } else if (utils.is(this, otherE) ||
+                       utils.is(this.value, otherE.value)) {
+                return null;
+            } else {
+                return this;
+            }
+        }
+    }
 }
 
-export class ArrayNode {
+export class ArrayNode extends Node {
 
     constructor(children, childrenCount, entryCount) {
+        super();
         this.children = children;
         this.childrenCount = childrenCount;
         this.entryCount = entryCount;
@@ -142,9 +180,10 @@ export class ArrayNode {
     }
 }
 
-export class CollisionNode {
+export class CollisionNode extends Node {
 
     constructor(children, keyHash) {
+        super();
         this.children = children;
         this.keyHash = keyHash;
     }
@@ -208,21 +247,6 @@ export class CollisionNode {
 }
 
 // 
-// fun difference(lNode: Any?, rNode: Any?, shift: Int): Any? {
-//     return if (lNode === rNode) {
-//         null
-//     } else if (lNode != null && rNode != null) {
-//         when (lNode) {
-//             is ArrayNode -> differenceA(lNode, rNode, shift)
-//             is Entry -> differenceE(lNode, rNode, shift)
-//             is CollisionNode -> differenceC(lNode, rNode, shift)
-//             else -> throw UnsupportedOperationException()
-//         }
-//     } else {
-//         lNode
-//     }
-// }
-// 
 // private fun differenceA(lNode: ArrayNode, rNode: Any, shift: Int): Any? {
 //     return when (rNode) {
 //         is ArrayNode -> {
@@ -280,28 +304,6 @@ export class CollisionNode {
 //                 })
 //         }
 //         else -> throw UnsupportedOperationException()
-//     }
-// }
-// 
-// private fun differenceE(lEntry: Entry, rNode: Any, shift: Int): Any? {
-//     return when (rNode) {
-//         is Entry -> {
-//             if (lEntry.key == rNode.key && lEntry.value == rNode.value) {
-//                 null
-//             } else {
-//                 lEntry
-//             }
-//         }
-//         else -> {
-//             val rEntry = getEntry(rNode, shift, lEntry.keyHash, lEntry.key)
-//             if (rEntry == null) {
-//                 lEntry
-//             } else if (lEntry === rEntry || lEntry.value == rEntry.value) {
-//                 null
-//             } else {
-//                 lEntry
-//             }
-//         }
 //     }
 // }
 // 

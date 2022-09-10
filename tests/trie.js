@@ -255,74 +255,63 @@ describe("dissoc", () => {
     })
 })
 
-// 
-// @Test
-// fun differenceNull() {
-//     val e = Entry(1, 1, 1)
-//     assertNull(difference(e, e, 0))
-//     assertNull(difference(null, null, 0))
-//     assertNull(difference(null, e, 0))
-//     assertTrue(difference(e, null, 0) === e)
-// }
-// 
-// @Test
-// fun difference_Entry_Entry_Equal() {
-//     val e = Entry(1, 1, 1)
-//     assertNull(difference(e, Entry(1, 1, 1), 0))
-// }
-// 
-// @Test
-// fun difference_Entry_Entry_DiffValues() {
-//     val e = Entry(1, 1, 1)
-//     assertTrue(difference(e, Entry(1, 1, 2), 0) === e)
-// }
-// 
-// @Test
-// fun difference_Entry_Entry_DifferentKey() {
-//     val e = Entry(1, 1, 1)
-//     assertTrue(difference(e, Entry(2, 2, 1), 0) === e)
-// }
-// 
-// @Test
-// fun difference_Entry_CollisionNode_NotFound() {
-//     val e = Entry(1, 1, 1)
-//     assertTrue(difference(
-//         e,
-//         makeCollisionNode(Entry(1, 2, 2), Entry(1, 3, 3)),
-//         0) === e)
-// }
-// 
-// @Test
-// fun difference_Entry_CollisionNode_SameEntry() {
-//     val e = Entry(1, 1, 1)
-//     assertNull(difference(e, makeCollisionNode(e, Entry(1, 2, 2)), 0))
-// }
-// 
-// @Test
-// fun difference_Entry_CollisionNode_SameValue() {
-//     val e = Entry(1, 1, 1)
-//     assertNull(difference(
-//         e,
-//         makeCollisionNode(Entry(1, 1, 1), Entry(1, 2, 2)),
-//         0))
-// }
-// 
-// @Test
-// fun difference_Entry_CollisionNode_DiffValue() {
-//     val e = Entry(1, 1, 1)
-//     assertTrue(difference(
-//         e,
-//         makeCollisionNode(Entry(1, 1, 2), Entry(1, 2, 2)),
-//         0) === e)
-// }
-// 
-// @Test
-// fun difference_Entry_ArrayNode() {
-//     assertNull(difference(
-//         Entry(1, 1, 1),
-//         makeArrayNodeOf(Entry(1, 1, 1), Entry(2, 2, 2)),
-//         0))
-// }
+describe("difference", () => {
+    test("common", () => {
+        const e = new Entry(1, 1, 1);
+        expect(e.difference(e, 0)).toBeNull();
+        expect(e.difference(null, 0)).toBe(e);
+    })
+    describe("Entry", () => {
+        describe("to Entry", () => {
+            test("equal", () => {
+                const e = new Entry(1, 1, 1);
+                expect(e.difference(new Entry(1, 1, 1), 0)).toBeNull();
+            })
+            test("different values", () => {
+                const e = new Entry(1, 1, 1);
+                expect(e.difference(new Entry(1, 1, 2), 0)).toBe(e);
+            })
+            test("different keys", () => {
+                const e = new Entry(1, 1, 1);
+                expect(e.difference(new Entry(2, 2, 1), 0)).toBe(e);
+            })
+        })
+        describe("to CollisionNode", () => {
+            test("not found", () => {
+                const e1 = new Entry(1, 1, 1);
+                const e2 = new Entry(1, 2, 2);
+                const e3 = new Entry(1, 3, 3);
+                const c = makeCollisionNode(e2, e3);
+                expect(e1.difference(c, 0)).toBe(e1);
+            })
+            test("same entry", () => {
+                const e1 = new Entry(1, 1, 1);
+                const e2 = new Entry(1, 2, 2);
+                const c = makeCollisionNode(e1, e2);
+                expect(e1.difference(c, 0)).toBeNull();
+            })
+            test("same value", () => {
+                const e1 = new Entry(1, 1, 1);
+                const e2 = new Entry(1, 2, 2);
+                const c = makeCollisionNode(new Entry(1, 1, 1), e2);
+                expect(e1.difference(c, 0)).toBeNull();
+            })
+            test("different value", () => {
+                const e1 = new Entry(1, 1, 1);
+                const e2 = new Entry(1, 2, 2);
+                const c = makeCollisionNode(new Entry(1, 1, 2), e2);
+                expect(e1.difference(c, 0)).toBe(e1);
+            })
+        })
+        describe("to ArrayNode", () => {
+            test("same value", () => {
+                const e1 = new Entry(1, 1, 1);
+                const e2 = new Entry(1, 2, 2);
+                const c = makeArrayNodeOf(new Entry(1, 1, 1), e2);
+                expect(e1.difference(c, 0)).toBeNull();
+            })
+        })
+    })
 // 
 // @Test
 // fun difference_CollisionNode_Entry_Miss() {
@@ -498,6 +487,8 @@ describe("dissoc", () => {
 //     assertNull(getEntry(d, 0, 3, 3))
 //     assertNull(getEntry(d, 0, 4, 4))
 // }
+})
+
 // 
 // @Test
 // fun getNodeByKeyHash_Entry() {
