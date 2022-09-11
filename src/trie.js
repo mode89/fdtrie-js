@@ -1,36 +1,8 @@
 import * as utils from "utils.js"
 
-class Node {
-
-    difference(other, shift) {
-        if (this === other) {
-            return null;
-        } else {
-            if (other !== null) {
-                return this.differenceImpl(other, shift);
-            } else {
-                return this;
-            }
-        }
-    }
-
-    differenceToEntry(other, shift) {
-        const thisEntry = this.getEntry(shift, other.keyHash, other.key);
-        if (thisEntry === undefined) {
-            return this;
-        } else if (thisEntry === other ||
-                   utils.is(thisEntry.value, other.value)) {
-            return this.dissoc(shift, other.keyHash, other.key);
-        } else {
-            return this;
-        }
-    }
-}
-
-export class Entry extends Node {
+export class Entry {
 
     constructor(keyHash, key, value) {
-        super();
         this.keyHash = keyHash;
         this.key = key;
         this.value = value;
@@ -75,7 +47,7 @@ export class Entry extends Node {
         if (other instanceof Entry) {
             if (utils.is(this.key, other.key) &&
                 utils.is(this.value, other.value)) {
-                return null;
+                return undefined;
             } else {
                 return this;
             }
@@ -85,7 +57,7 @@ export class Entry extends Node {
                 return this;
             } else if (utils.is(this, otherE) ||
                        utils.is(this.value, otherE.value)) {
-                return null;
+                return undefined;
             } else {
                 return this;
             }
@@ -93,10 +65,9 @@ export class Entry extends Node {
     }
 }
 
-export class ArrayNode extends Node {
+export class ArrayNode {
 
     constructor(children, childrenCount, entryCount) {
-        super();
         this.children = children;
         this.childrenCount = childrenCount;
         this.entryCount = entryCount;
@@ -175,7 +146,7 @@ export class ArrayNode extends Node {
                         var returnChild = undefined;
                     }
 
-                    if (returnChild == undefined) {
+                    if (returnChild === undefined) {
                         return new ArrayNode(
                             utils.immArraySet(
                                 this.children, childIndex, newChild),
@@ -190,12 +161,73 @@ export class ArrayNode extends Node {
             return this;
         }
     }
+
+    differenceImpl(other, shift) {
+        switch (other.constructor) {
+            case ArrayNode: {
+                const children = new Array(32);
+                var childrenCount = 0;
+                var entryCount = 0;
+                var returnThis = true;
+                for (let i = 0; i < 32; i ++) {
+                    const thisChild = this.children[i];
+                    const otherChild = other.children[i];
+                    const newChild = difference(
+                        thisChild, otherChild, shift + 5);
+                    children[i] = newChild;
+                    if (newChild !== undefined) {
+                        childrenCount ++;
+                        entryCount += newChild.countEntries();
+                    }
+                    if (newChild !== thisChild) {
+                        returnThis = false;
+                    }
+                }
+
+                if (childrenCount == 0) {
+                    return undefined;
+                } else if (returnThis) {
+                    return this;
+                } else {
+                    // If only one child left and it is not an ArrayNode,
+                    // we should return this child, instead
+                    const lastChild = childrenCount == 1
+                        ? children.find(
+                            it => (it !== undefined) &&
+                                  !(it instanceof ArrayNode))
+                        : undefined;
+
+                    return lastChild === undefined
+                        ? new ArrayNode(children, childrenCount, entryCount)
+                        : lastChild;
+                }
+            }
+            case Entry:
+                return differenceToEntry(this, other, shift);
+            case CollisionNode:
+                return other.children.reduce(
+                    (result, otherEntry) => {
+                        const thisEntry = result.getEntry(
+                            shift, otherEntry.keyHash, otherEntry.key);
+                        if (thisEntry !== undefined
+                            && (thisEntry === otherEntry
+                                || utils.is(
+                                    thisEntry.value,
+                                    otherEntry.value))) {
+                            return result.dissoc(
+                                shift, otherEntry.keyHash, otherEntry.key);
+                        } else {
+                            return result;
+                        }
+                    }, this);
+            default: throw "Unexpected type of node";
+        }
+    }
 }
 
-export class CollisionNode extends Node {
+export class CollisionNode {
 
     constructor(children, keyHash) {
-        super();
         this.children = children;
         this.keyHash = keyHash;
     }
@@ -259,7 +291,7 @@ export class CollisionNode extends Node {
 
     differenceImpl(other, shift) {
         if (other instanceof Entry) {
-            return this.differenceToEntry(other);
+            return differenceToEntry(this, other, shift);
         } else {
             const children = this.children.filter(
                 thisEntry => {
@@ -270,7 +302,7 @@ export class CollisionNode extends Node {
                         : !utils.is(thisEntry.value, otherEntry.value);
                 })
             if (children.length == 0) {
-                return null;
+                return undefined;
             } else if (children.length == 1) {
                 return children[0];
             } else if (children.length == this.children.length) {
@@ -282,66 +314,28 @@ export class CollisionNode extends Node {
     }
 }
 
-// 
-// private fun differenceA(lNode: ArrayNode, rNode: Any, shift: Int): Any? {
-//     return when (rNode) {
-//         is ArrayNode -> {
-//             val children = arrayOfNulls<Any>(32)
-//             var childrenCount = 0
-//             var entryCount = 0
-//             var returnLeftNode = true
-//             for (i in 0..31) {
-//                 val lChild = lNode.children[i]
-//                 val rChild = rNode.children[i]
-//                 val child = difference(lChild, rChild, shift + 5)
-//                 children[i] = child
-//                 if (child != null) {
-//                     childrenCount ++
-//                     entryCount += countEntries(child)
-//                 }
-//                 if (child != lChild) {
-//                     returnLeftNode = false
-//                 }
-//             }
-// 
-//             if (childrenCount == 0) {
-//                 null
-//             } else if (returnLeftNode) {
-//                 lNode
-//             } else {
-//                 // If only one child left and it is not an ArrayNode,
-//                 // we should return this child, instead
-//                 val lastChild = if (childrenCount == 1) {
-//                     children.firstOrNull { it != null && it !is ArrayNode }
-//                 } else {
-//                     null
-//                 }
-// 
-//                 if (lastChild == null) {
-//                     ArrayNode(children, childrenCount, entryCount)
-//                 } else {
-//                     lastChild
-//                 }
-//             }
-//         }
-//         is Entry -> differenceXE(lNode, rNode, shift)
-//         is CollisionNode -> {
-//             rNode.children.fold(lNode,
-//                 fun(result: Any, rEntry: Entry): Any {
-//                     val lEntry = getEntry(
-//                         result, shift, rEntry.keyHash, rEntry.key)
-//                     return if (lEntry != null
-//                                && (lEntry === rEntry
-//                                    || lEntry.value == rEntry.value)) {
-//                         dissoc(result, shift, rEntry.keyHash, rEntry.key)!!
-//                     } else {
-//                         result
-//                     }
-//                 })
-//         }
-//         else -> throw UnsupportedOperationException()
-//     }
-// }
+export function difference(lNode, rNode, shift) {
+    if (lNode === rNode) {
+        return undefined;
+    } else if (lNode !== undefined && rNode !== undefined) {
+        return lNode.differenceImpl(rNode, shift);
+    } else {
+        return lNode;
+    }
+}
+
+function differenceToEntry(rNode, lEntry, shift) {
+    const rEntry = rNode.getEntry(shift, lEntry.keyHash, lEntry.key);
+    if (rEntry === undefined) {
+        return rNode;
+    } else if (rEntry === lEntry ||
+               utils.is(rEntry.value, lEntry.value)) {
+        return rNode.dissoc(shift, lEntry.keyHash, lEntry.key);
+    } else {
+        return rNode;
+    }
+}
+
 // 
 // fun intersect(lNode: Any?, rNode: Any?, shift: Int): Any? {
 //     return if (lNode === rNode) {
