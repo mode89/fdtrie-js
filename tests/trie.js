@@ -312,85 +312,75 @@ describe("difference", () => {
             })
         })
     })
-// 
-// @Test
-// fun difference_CollisionNode_Entry_Miss() {
-//     val c = makeCollisionNode(Entry(1, 1, 1), Entry(1, 2, 2))
-//     assertTrue(difference(c, Entry(1, 3, 3), 0) === c)
-// }
-// 
-// @Test
-// fun difference_CollisionNode_Entry_SameEntry() {
-//     val e1 = Entry(1, 1, 1)
-//     val e2 = Entry(1, 2, 2)
-//     val c = makeCollisionNode(e1, e2)
-//     assertTrue(difference(c, e1, 0) === e2)
-// }
-// 
-// @Test
-// fun difference_CollisionNode_Entry_SameValue() {
-//     val e = Entry(1, 1, 1)
-//     val c = makeCollisionNode(e, Entry(1, 2, 2))
-//     assertTrue(difference(c, Entry(1, 2, 2), 0) === e)
-// }
-// 
-// @Test
-// fun difference_CollisionNode_Entry_DiffValue() {
-//     val c = makeCollisionNode(Entry(1, 1, 1), Entry(1, 2, 2))
-//     assertTrue(difference(c, Entry(1, 1, 2), 0) === c)
-// }
-// 
-// @Test
-// fun difference_CollisionNode_CollisionNode_Equal() {
-//     assertNull(
-//         difference(
-//             makeCollisionNode(Entry(1, 1, 1), Entry(1, 2, 2)),
-//             makeCollisionNode(Entry(1, 1, 1), Entry(1, 2, 2)),
-//             0))
-// }
-// 
-// @Test
-// fun difference_CollisionNode_CollisionNode_ReturnEntry() {
-//     val e = Entry(1, 1, 1)
-//     assertTrue(
-//         difference(
-//             makeCollisionNode(e, Entry(1, 2, 2)),
-//             makeCollisionNode(Entry(1, 2, 2), Entry(1, 3, 3)),
-//             0) === e)
-// }
-// 
-// @Test
-// fun difference_CollisionNode_CollisionNode_ReturnLeftNode() {
-//     val c = makeCollisionNode(Entry(1, 1, 1), Entry(1, 2, 2))
-//     assertTrue(
-//         difference(
-//             c,
-//             makeCollisionNode(Entry(1, 3, 3), Entry(1, 4, 4)),
-//             0) === c)
-// }
-// 
-// @Test
-// fun difference_CollisionNode_CollisionNode_ReturnCollisionNode() {
-//     val c = difference(
-//         makeCollisionNode(Entry(1, 1, 1), Entry(1, 2, 2), Entry(1, 3, 3)),
-//         makeCollisionNode(Entry(1, 3, 3), Entry(1, 4, 4)),
-//         0) as CollisionNode
-//     assertEquals(2, countEntries(c))
-//     assertEquals(Entry(1, 1, 1), getEntry(c, 0, 1, 1))
-//     assertEquals(Entry(1, 2, 2), getEntry(c, 0, 1, 2))
-//     assertNull(getEntry(c, 0, 1, 3))
-//     assertNull(getEntry(c, 0, 1, 4))
-// }
-// 
-// @Test
-// fun difference_CollisionNode_CollisionNode_DiffValue() {
-//     assertEquals(
-//         Entry(1, 1, 1),
-//         difference(
-//             makeCollisionNode(Entry(1, 1, 1), Entry(1, 2, 2)),
-//             makeCollisionNode(Entry(1, 1, 2), Entry(1, 2, 2)),
-//             0))
-// }
+    describe("CollisionNode", () => {
+        describe("to Entry", () => {
+            test("miss", () => {
+                const c = makeCollisionNode(
+                    new Entry(1, 1, 1), new Entry(1, 2, 2));
+                expect(c.difference(new Entry(1, 3, 3), 0)).toBe(c);
+            })
+            test("same entry", () => {
+                const e1 = new Entry(1, 1, 1);
+                const e2 = new Entry(1, 2, 2);
+                const c = makeCollisionNode(e1, e2);
+                expect(c.difference(e1, 0)).toBe(e2);
+            })
+            test("same value", () => {
+                const e = new Entry(1, 1, 1);
+                const c = makeCollisionNode(e, new Entry(1, 2, 2));
+                expect(c.difference(new Entry(1, 2, 2), 0)).toBe(e);
+            })
+            test("different value", () => {
+                const c = makeCollisionNode(
+                    new Entry(1, 1, 1), new Entry(1, 2, 2));
+                expect(c.difference(new Entry(1, 1, 2), 0)).toBe(c);
+            })
+        })
+        describe("to CollisionNode", () => {
+            test("equal", () => {
+                const c1 = makeCollisionNode(
+                    new Entry(1, 1, 1), new Entry(1, 2, 2));
+                const c2 = makeCollisionNode(
+                    new Entry(1, 1, 1), new Entry(1, 2, 2));
+                expect(c1.difference(c2, 0)).toBeNull();
+            })
+            test("return entry", () => {
+                const e = new Entry(1, 1, 1);
+                const c1 = makeCollisionNode(e, new Entry(1, 2, 2));
+                const c2 = makeCollisionNode(
+                    new Entry(1, 2, 2), new Entry(1, 3, 3));
+                expect(c1.difference(c2, 0)).toBe(e);
+            })
+            test("return left node", () => {
+                const c1 = makeCollisionNode(
+                    new Entry(1, 1, 1), new Entry(1, 2, 2));
+                const c2 = makeCollisionNode(
+                    new Entry(1, 3, 3), new Entry(1, 4, 4));
+                expect(c1.difference(c2, 0)).toBe(c1);
+            })
+            test("return collision node", () => {
+                const e1 = new Entry(1, 1, 1);
+                const e2 = new Entry(1, 2, 2);
+                const c1 = makeCollisionNode(e1, e2, new Entry(1, 3, 3));
+                const c2 = makeCollisionNode(
+                    new Entry(1, 3, 3), new Entry(1, 4, 4));
+                const c = c1.difference(c2, 0);
+                expect(c).toBeInstanceOf(CollisionNode);
+                expect(c.countEntries()).toBe(2);
+                expect(c.getEntry(0, 1, 1)).toBe(e1);
+                expect(c.getEntry(0, 1, 2)).toBe(e2);
+                expect(c.getEntry(0, 1, 3)).toBeUndefined();
+                expect(c.getEntry(0, 1, 4)).toBeUndefined();
+            })
+            test("different value", () => {
+                const e = new Entry(1, 1, 1);
+                const c1 = makeCollisionNode(e, new Entry(1, 2, 2));
+                const c2 = makeCollisionNode(
+                    new Entry(1, 1, 2), new Entry(1, 2, 2));
+                expect(c1.difference(c2, 0)).toBe(e);
+            })
+        })
+    })
 // 
 // @Test
 // fun difference_ArrayNode_Entry() {

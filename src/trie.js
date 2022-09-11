@@ -13,6 +13,18 @@ class Node {
             }
         }
     }
+
+    differenceToEntry(other, shift) {
+        const thisEntry = this.getEntry(shift, other.keyHash, other.key);
+        if (thisEntry === undefined) {
+            return this;
+        } else if (thisEntry === other ||
+                   utils.is(thisEntry.value, other.value)) {
+            return this.dissoc(shift, other.keyHash, other.key);
+        } else {
+            return this;
+        }
+    }
 }
 
 export class Entry extends Node {
@@ -244,6 +256,30 @@ export class CollisionNode extends Node {
             }
         }
     }
+
+    differenceImpl(other, shift) {
+        if (other instanceof Entry) {
+            return this.differenceToEntry(other);
+        } else {
+            const children = this.children.filter(
+                thisEntry => {
+                    const otherEntry = other.getEntry(
+                        shift, thisEntry.keyHash, thisEntry.key);
+                    return otherEntry === undefined
+                        ? true
+                        : !utils.is(thisEntry.value, otherEntry.value);
+                })
+            if (children.length == 0) {
+                return null;
+            } else if (children.length == 1) {
+                return children[0];
+            } else if (children.length == this.children.length) {
+                return this;
+            } else {
+                return new CollisionNode(children, this.keyHash);
+            }
+        }
+    }
 }
 
 // 
@@ -304,44 +340,6 @@ export class CollisionNode extends Node {
 //                 })
 //         }
 //         else -> throw UnsupportedOperationException()
-//     }
-// }
-// 
-// private fun differenceC(lNode: CollisionNode, rNode: Any, shift: Int): Any? {
-//     return when (rNode) {
-//         is Entry -> differenceXE(lNode, rNode, shift)
-//         else -> {
-//             val children = lNode.children.filter(
-//                 fun(lEntry): Boolean {
-//                     val rEntry = getEntry(
-//                         rNode, shift, lEntry.keyHash, lEntry.key)
-//                     return if (rEntry == null) {
-//                         true
-//                     } else {
-//                         lEntry.value != rEntry.value
-//                     }
-//                 })
-//             if (children.size == 0) {
-//                 null
-//             } else if (children.size == 1) {
-//                 children.get(0)
-//             } else if (children.size == lNode.children.size) {
-//                 lNode
-//             } else {
-//                 CollisionNode(children, lNode.keyHash)
-//             }
-//         }
-//     }
-// }
-// 
-// private fun differenceXE(lNode: Any, rEntry: Entry, shift: Int): Any? {
-//     val lEntry = getEntry(lNode, shift, rEntry.keyHash, rEntry.key)
-//     return if (lEntry == null) {
-//         lNode
-//     } else if (lEntry === rEntry || lEntry.value == rEntry.value) {
-//         dissoc(lNode, shift, rEntry.keyHash, rEntry.key)
-//     } else {
-//         lNode
 //     }
 // }
 // 
