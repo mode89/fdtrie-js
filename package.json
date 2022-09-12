@@ -14,8 +14,12 @@
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage"
   },
   "jest": {
-    "testMatch": [ "**/tests/*.js" ],
-    "modulePaths": [ "<rootDir>/src" ]
+    "testMatch": [
+      "**/tests/*.js"
+    ],
+    "modulePaths": [
+      "<rootDir>/src"
+    ]
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
