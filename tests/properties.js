@@ -1,5 +1,6 @@
 import * as fc from "fast-check";
-import {PHashMap} from "map.js"
+import {PHashMap} from "map.js";
+import * as utils from "utils.js";
 
 describe("properties", () => {
 
@@ -39,6 +40,17 @@ describe("properties", () => {
         { numRuns: 1000 }
     ))
 })
+
+test("hash", () => fc.assert(
+    fc.property(
+        fc.anything(),
+        x => {
+            const h = utils.hash(x);
+            expect(h).toBeGreaterThanOrEqual(-0x80000000);
+            expect(h).toBeLessThanOrEqual(0x7FFFFFFF);
+        }),
+    { numRuns: 1000 }
+))
 
 function makePHashMapFromMap(m, keyHasher) {
     var pm = PHashMap.blank(keyHasher);
