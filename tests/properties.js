@@ -46,7 +46,7 @@ test("hash", () => fc.assert(
             expect(h).toBeGreaterThanOrEqual(-0x80000000);
             expect(h).toBeLessThanOrEqual(0x7FFFFFFF);
         }),
-    { numRuns: 1000 }
+    { numRuns: 10000 }
 ))
 
 function makePHashMapFromMap(m, keyHasher) {
