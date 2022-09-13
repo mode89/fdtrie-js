@@ -111,6 +111,7 @@ function expectSimilar(m, pm, knownKeys) {
         }
     }
     expect(m2).toStrictEqual(m);
+    expect(m.size).toBe(pm.count());
 }
 
 function genMapAndOps() {
