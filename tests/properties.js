@@ -2,44 +2,41 @@ import * as fc from "fast-check";
 import {PHashMap} from "map.js";
 import * as utils from "utils.js";
 
-describe("properties", () => {
+test("build", () => fc.assert(
+    fc.property(
+        genOpsAndKeys(),
+        opsAndKeys => {
+            const ops = opsAndKeys.ops;
+            const keys = opsAndKeys.keys;
+            const m = applyOpsToMap(ops, new Map());
+            const pm = applyOpsToPHashMap(
+                ops, PHashMap.blank(testKeyHasher));
+            expectSimilar(m, pm, keys)
+        }),
+    { numRuns: 1000 }
+))
 
-    test("build", () => fc.assert(
-        fc.property(
-            genOpsAndKeys(),
-            opsAndKeys => {
-                const ops = opsAndKeys.ops;
-                const keys = opsAndKeys.keys;
-                const m = applyOpsToMap(ops, new Map());
-                const pm = applyOpsToPHashMap(
-                    ops, PHashMap.blank(testKeyHasher));
-                expectSimilar(m, pm, keys)
-            }),
-        { numRuns: 1000 }
-    ))
-
-    test("difference", () => fc.assert(
-        fc.property(
-            genMapAndOps(),
-            sample => {
-                const keys = sample.keys;
-                const ops = sample.ops;
-                const m1 = sample.m;
-                const m2 = applyOpsToMap(ops, m1);
-                const pm1 = makePHashMapFromMap(m1, testKeyHasher);
-                const pm2 = applyOpsToPHashMap(ops, pm1);
-                expectSimilar(
-                    mapDifference(m1, m2),
-                    pm1.difference(pm2),
-                    keys);
-                expectSimilar(
-                    mapDifference(m2, m1),
-                    pm2.difference(pm1),
-                    keys);
-            }),
-        { numRuns: 1000 }
-    ))
-})
+test("difference", () => fc.assert(
+    fc.property(
+        genMapAndOps(),
+        sample => {
+            const keys = sample.keys;
+            const ops = sample.ops;
+            const m1 = sample.m;
+            const m2 = applyOpsToMap(ops, m1);
+            const pm1 = makePHashMapFromMap(m1, testKeyHasher);
+            const pm2 = applyOpsToPHashMap(ops, pm1);
+            expectSimilar(
+                mapDifference(m1, m2),
+                pm1.difference(pm2),
+                keys);
+            expectSimilar(
+                mapDifference(m2, m1),
+                pm2.difference(pm1),
+                keys);
+        }),
+    { numRuns: 1000 }
+))
 
 test("hash", () => fc.assert(
     fc.property(

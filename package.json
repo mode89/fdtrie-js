@@ -13,7 +13,7 @@
   "scripts": {
     "bench": "node benchmarks/main.js",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
-    "test-props": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage -t 'properties'"
+    "test-props": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage tests/properties.js"
   },
   "jest": {
     "testMatch": [
