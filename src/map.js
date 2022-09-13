@@ -1,5 +1,5 @@
-import {hash} from "utils.js"
-import {Entry, difference} from "trie.js"
+import {hash} from "./utils.js"
+import {Entry, difference} from "./trie.js"
 
 export class PHashMap {
 
