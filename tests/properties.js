@@ -2,6 +2,7 @@ import * as fc from "fast-check";
 import {PHashMap} from "map.js"
 
 describe("properties", () => {
+
     test("build", () => fc.assert(
         fc.property(
             genOpsAndKeys(),
@@ -15,10 +16,43 @@ describe("properties", () => {
             }),
         { numRuns: 1000 }
     ))
+
+    test("difference", () => fc.assert(
+        fc.property(
+            genMapAndOps(),
+            sample => {
+                const keys = sample.keys;
+                const ops = sample.ops;
+                const m1 = sample.m;
+                const m2 = applyOpsToMap(ops, m1);
+                const pm1 = makePHashMapFromMap(m1, testKeyHasher);
+                const pm2 = applyOpsToPHashMap(ops, pm1);
+                expectSimilar(
+                    mapDifference(m1, m2),
+                    pm1.difference(pm2),
+                    keys);
+                expectSimilar(
+                    mapDifference(m2, m1),
+                    pm2.difference(pm1),
+                    keys);
+            }),
+        { numRuns: 1000 }
+    ))
 })
 
+function makePHashMapFromMap(m, keyHasher) {
+    var pm = PHashMap.blank(keyHasher);
+    for (const [key, value] of m.entries()) {
+        pm = pm.assoc(key, value);
+    }
+    return pm;
+}
+
 function applyOpsToMap(ops, m0) {
-    const m = new Map(m0);
+    const m = new Map();
+    for (const [key, value] of m0.entries()) {
+        m.set(key, value);
+    }
     for (const op of ops) {
         switch (op.type) {
             case "assoc":
@@ -48,6 +82,16 @@ function applyOpsToPHashMap(ops, m0) {
         }, m0);
 }
 
+function mapDifference(lMap, rMap) {
+    const m = new Map();
+    for (const [key, lValue] of lMap.entries()) {
+        if (!rMap.has(key) || !Object.is(lValue, rMap.get(key))) {
+            m.set(key, lValue);
+        }
+    }
+    return m;
+}
+
 function expectSimilar(m, pm, knownKeys) {
     const m2 = new Map();
     const notFound = new Object();
@@ -58,6 +102,28 @@ function expectSimilar(m, pm, knownKeys) {
         }
     }
     expect(m2).toStrictEqual(m);
+}
+
+function genMapAndOps() {
+    return genKeys().chain(
+        keys => genValues().chain(
+            values => fc.record({
+                keys: fc.constant(keys),
+                m: genMap(keys, values),
+                ops: genOps(keys, values),
+            })));
+}
+
+function genMap(knownKeys, knownValues) {
+    return fc.uniqueArray(fc.constantFrom(...knownKeys)).chain(
+        keys => {
+            const m = new Map();
+            const values = fc.constantFrom(...knownValues);
+            for (const k of keys) {
+                m.set(k, fc.sample(values, 1)[0])
+            }
+            return fc.constant(m);
+        })
 }
 
 function genOpsAndKeys() {
