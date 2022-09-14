@@ -156,4 +156,35 @@ describe("PHashMap", () => {
             expect(md.keyHasher).toBe(hasher);
         })
     })
+
+    describe("seq", () => {
+
+        test("blank", () => {
+            const m = PHashMap.blank();
+            expect(m.seq()).toBeUndefined();
+        })
+
+        test("first", () => {
+            const k = [1];
+            const v = [2];
+            const m = PHashMap.blank().assoc(k, v);
+            const s = m.seq();
+            const e = s.first();
+            expect(e.key).toBe(k);
+            expect(e.value).toBe(v);
+        })
+    })
+
+    test("entries", () => {
+        const m = PHashMap.blank().assoc(1, 2).assoc(3, 4);
+        for (const e of m.entries()) {
+            if (e.key == 1) {
+                expect(e.value).toBe(2);
+            } else if (e.key == 3) {
+                expect(e.value).toBe(4);
+            } else {
+                throw "Unexpected key";
+            }
+        }
+    })
 })

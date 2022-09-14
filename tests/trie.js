@@ -1,6 +1,7 @@
 import {ArrayNode,
         Entry,
         CollisionNode,
+        TrieSeq,
         difference,
         makeArrayNode} from "trie.js"
 import {is} from "utils.js"
@@ -468,6 +469,81 @@ describe("difference", () => {
                 expect(d.getEntry(0, 3, 3)).toBeUndefined();
                 expect(d.getEntry(0, 4, 4)).toBeUndefined();
             })
+        })
+    })
+})
+
+describe("seq", () => {
+    describe("Entry", () => {
+        test("hit", () => {
+            const e = new Entry(1, 1, 1);
+            const s = e.seq(e, 0, 1, 0);
+            expect(s).toBeInstanceOf(TrieSeq);
+            expect(s.first()).toBe(e);
+        })
+        test("miss", () => {
+            const e = new Entry(1, 1, 1);
+            const s = e.seq(e, 0, 1, 1);
+            expect(s).toBeUndefined();
+        })
+    })
+    describe("CollisionNode", () => {
+        test("hit", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(1, 2, 2);
+            const c = makeCollisionNode(e1, e2);
+            const s = c.seq(c, 0, 1, 1);
+            expect(s).toBeInstanceOf(TrieSeq);
+            expect(s.first()).toBe(e2);
+        })
+        test("miss", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(1, 2, 2);
+            const c = makeCollisionNode(e1, e2);
+            const s = c.seq(c, 0, 1, 2);
+            expect(s).toBeUndefined();
+        })
+    })
+    describe("ArrayNode", () => {
+        test("hit", () => {
+            const e0 = new Entry(0, 0, 0);
+            const e1 = new Entry(1, 1, 1);
+            const a = makeArrayNodeOf(e0, e1);
+            const s = a.seq(a, 0, 0, 0);
+            expect(s).toBeInstanceOf(TrieSeq);
+            expect(s.first()).toBe(e0);
+        })
+        test("reset keyHash to 0", () => {
+            const e1 = new Entry(2, 1, 0);
+            const e2 = new Entry(33, 2, 0);
+            const e3 = new Entry(34, 3, 0);
+            const a = makeArrayNodeOf(e1, e2, e3);
+            const s = a.seq(a, 0, 33, 1);
+            expect(s.first()).toBe(e1);
+        })
+        test("skip empty children", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(3, 3, 3);
+            const a = makeArrayNodeOf(e1, e2);
+            const s = a.seq(a, 0, 1, 1);
+            expect(s.first()).toBe(e2);
+        })
+        test("finish", () => {
+            const e1 = new Entry(1, 1, 1);
+            const e2 = new Entry(3, 3, 3);
+            const a = makeArrayNodeOf(e1, e2);
+            const s = a.seq(a, 0, 3, 1);
+            expect(s).toBeUndefined();
+        })
+        test("first", () => {
+            const e = new Entry(1, 1, 1);
+            const s = e.seq(e, 0, 1, 0);
+            expect(s.first()).toBe(e);
+        })
+        test("next", () => {
+            const e = new Entry(1, 1, 1);
+            const s = e.seq(e, 0, 1, 0);
+            expect(s.next()).toBeUndefined();
         })
     })
 })

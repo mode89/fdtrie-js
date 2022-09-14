@@ -1,5 +1,6 @@
 import * as fc from "fast-check";
 import {PHashMap} from "map.js";
+import stringify from "json-stable-stringify";
 import * as utils from "utils.js";
 
 test("build", () => fc.assert(
@@ -34,6 +35,23 @@ test("difference", () => fc.assert(
                 mapDifference(m2, m1),
                 pm2.difference(pm1),
                 keys);
+        }),
+    { numRuns: 1000 }
+))
+
+test("entries", () => fc.assert(
+    fc.property(
+        genKeyValuePairs(),
+        kvs => {
+            const m = kvs.reduce(
+                (mi, e) => mi.assoc(e[0], e[1]),
+                PHashMap.blank(testKeyHasher))
+            const entries = Array.from(m.entries())
+                .map(e => [e.key, e.value]);
+            const compare = (a, b) => stringify(a) < stringify(b) ? -1 : 1;
+            kvs.sort(compare);
+            entries.sort(compare);
+            expect(entries).toEqual(kvs);
         }),
     { numRuns: 1000 }
 ))
@@ -134,6 +152,14 @@ function genMap(knownKeys, knownValues) {
             }
             return fc.constant(m);
         })
+}
+
+function genKeyValuePairs() {
+    return genKeys().map(
+        keys => {
+            const value = genObject();
+            return keys.map(k => [k, fc.sample(value, 1)[0]]);
+        });
 }
 
 function genOpsAndKeys() {

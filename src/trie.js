@@ -63,6 +63,12 @@ export class Entry {
             }
         }
     }
+
+    seq(root, shift, keyHash, entryIndex) {
+        return entryIndex === 0
+            ? new TrieSeq(root, this, 0)
+            : undefined;
+    }
 }
 
 export class ArrayNode {
@@ -223,6 +229,27 @@ export class ArrayNode {
             default: throw "Unexpected type of node";
         }
     }
+
+    seq(root, shift, keyHash, entryIndex) {
+        const childIndex = arrayIndex(shift, keyHash);
+        for (let i = childIndex; i < 32; i ++) {
+            const child = this.children[i];
+            if (child !== undefined) {
+                const s = child.seq(root, shift + 5, keyHash, entryIndex);
+                if (s !== undefined) {
+                    return s;
+                } else {
+                    // When the first ArrayNode's child is exhausted,
+                    // we look for the first entry in the next child
+                    entryIndex = 0;
+                    // Force searching to start from the first child
+                    // in the next ArrayNode
+                    keyHash = 0;
+                }
+            }
+        }
+        return undefined;
+    }
 }
 
 export class CollisionNode {
@@ -311,6 +338,33 @@ export class CollisionNode {
                 return new CollisionNode(children, this.keyHash);
             }
         }
+    }
+
+    seq(root, shift, keyHash, entryIndex) {
+        return entryIndex < this.children.length
+            ? new TrieSeq(root, this.children[entryIndex], entryIndex)
+            : undefined;
+    }
+}
+
+export class TrieSeq {
+    #root;
+    #entry;
+    #entryIndex;
+
+    constructor(root, entry, entryIndex) {
+        this.#root = root;
+        this.#entry = entry;
+        this.#entryIndex = entryIndex;
+    }
+
+    first() {
+        return this.#entry;
+    }
+
+    next() {
+        return this.#root.seq(
+            this.#root, 0, this.#entry.keyHash, this.#entryIndex + 1);
     }
 }
 

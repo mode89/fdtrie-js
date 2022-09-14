@@ -85,4 +85,16 @@ export class PHashMap {
             return new PHashMap(rootDiff, this.keyHasher);
         }
     }
+
+    seq() {
+        return this.root !== undefined
+            ? this.root.seq(this.root, 0, 0, 0)
+            : undefined;
+    }
+
+    *entries() {
+        for (let s = this.seq(); s !== undefined; s = s.next()) {
+            yield s.first();
+        }
+    }
 }
