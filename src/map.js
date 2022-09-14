@@ -21,6 +21,7 @@ export class PHashMap {
     constructor(root, keyHasher) {
         this.root = root;
         this.keyHasher = keyHasher;
+        Object.freeze(this);
     }
 
     count() {
