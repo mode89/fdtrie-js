@@ -202,9 +202,12 @@ function genKeys() {
     return keyValues.chain(
         vs => hashes.chain(
             hs => {
-                const arbHs = fc.constantFrom(...hs);
-                const keys = vs.map(
-                    v => ({ value: v, hash: fc.sample(arbHs, 1)[0] }));
+                const length = vs.length;
+                const keys = new Array(length);
+                for (let i = 0; i < length; ++ i) {
+                    const h = hs[i % hs.length];
+                    keys[i] = { value: vs[i], hash: h };
+                }
                 return fc.constant(keys);
             }));
 }
