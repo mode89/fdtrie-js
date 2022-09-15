@@ -1,6 +1,5 @@
 import * as fc from "fast-check";
 import {PHashMap} from "map.js";
-import stringify from "json-stable-stringify";
 import * as utils from "utils.js";
 
 test("build", () => fc.assert(
@@ -48,7 +47,8 @@ test("entries", () => fc.assert(
                 PHashMap.blank(testKeyHasher))
             const entries = Array.from(m.entries())
                 .map(e => [e.key, e.value]);
-            const compare = (a, b) => stringify(a) < stringify(b) ? -1 : 1;
+            const compare =
+                (a, b) => JSON.stringify(a) < JSON.stringify(b) ? -1 : 1;
             kvs.sort(compare);
             entries.sort(compare);
             expect(entries).toEqual(kvs);
