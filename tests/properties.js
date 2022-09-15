@@ -154,11 +154,13 @@ function genMap(knownKeys, knownValues) {
 }
 
 function genKeyValuePairs() {
-    return genKeys().map(
-        keys => {
-            const value = genObject();
-            return keys.map(k => [k, fc.sample(value, 1)[0]]);
-        });
+    return genKeys().chain(
+        keys => fc.infiniteStream(genObject()).chain(
+            valuesStream => {
+                const values = Array.from(valuesStream.take(keys.length));
+                const pairs = _.zip(keys, values);
+                return fc.constant(pairs);
+            }));
 }
 
 function genOpsAndKeys() {
