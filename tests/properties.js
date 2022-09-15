@@ -113,7 +113,7 @@ function applyOpsToPHashMap(ops, m0) {
 function mapDifference(lMap, rMap) {
     const m = new Map();
     for (const [key, lValue] of lMap.entries()) {
-        if (!rMap.has(key) || !Object.is(lValue, rMap.get(key))) {
+        if (!rMap.has(key) || !_.isEqual(lValue, rMap.get(key))) {
             m.set(key, lValue);
         }
     }

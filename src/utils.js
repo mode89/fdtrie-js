@@ -1,5 +1,7 @@
+import _ from "lodash";
+
 export function is(x, y) {
-    return Object.is(x, y);
+    return _.isEqual(x, y);
 }
 
 export function immArraySet(arr, i, x) {

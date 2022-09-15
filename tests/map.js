@@ -71,6 +71,22 @@ describe("PHashMap", () => {
             expect(m1).toBe(m2);
         })
 
+        test("equal key", () => {
+            const k1 = {a: 1, b: 2}
+            const k2 = {b: 2, a: 1}
+            const m1 = PHashMap.blank().assoc(k1, 42);
+            const m2 = m1.assoc(k2, 42);
+            expect(m2).toBe(m1);
+        })
+
+        test("equal value", () => {
+            const v1 = {a: 1, b: 2}
+            const v2 = {b: 2, a: 1}
+            const m1 = PHashMap.blank().assoc(42, v1);
+            const m2 = m1.assoc(42, v2);
+            expect(m2).toBe(m1);
+        })
+
         test("keep hasher", () => {
             const hasher = x => x;
             const m0 = PHashMap.blank(hasher);
