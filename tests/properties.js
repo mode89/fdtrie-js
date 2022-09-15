@@ -1,4 +1,5 @@
 import * as fc from "fast-check";
+import _ from "lodash";
 import {PHashMap} from "map.js";
 import * as utils from "utils.js";
 
@@ -195,8 +196,9 @@ function genDissocOp(keys) {
 }
 
 function genKeys() {
-    const keyValues = fc.uniqueArray(
-        genObject(), {minLength: 1, size: "medium"});
+    const keyValues = fc.array(
+        genObject(), {minLength: 1, size: "medium"})
+        .map(vs => _.uniqBy(vs, JSON.stringify));
     const hashes = fc.uniqueArray(
         fc.integer(), {minLength: 2, size: "medium"});
     return keyValues.chain(
