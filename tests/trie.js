@@ -4,7 +4,7 @@ import {ArrayNode,
         TrieSeq,
         difference,
         makeArrayNode} from "trie.js"
-import {is} from "utils.js"
+import {equal} from "utils.js"
 
 describe("assoc", () => {
     describe("Entry", () => {
@@ -554,7 +554,7 @@ function makeCollisionNode() {
     const keyHash = entries[0].keyHash;
     for (const e of entries) {
         expect(e.keyHash).toBe(keyHash);
-        expect(entries.filter(it => is(it.key, e.key)).length).toBe(1);
+        expect(entries.filter(it => equal(it.key, e.key)).length).toBe(1);
     }
     return new CollisionNode(entries, keyHash);
 }
@@ -563,7 +563,7 @@ function makeArrayNodeOf() {
     const entries = [...arguments];
     expect(entries.length).toBeGreaterThan(1);
     for (const e of entries) {
-        expect(entries.filter(it => is(it.key, e.key)).length).toBe(1);
+        expect(entries.filter(it => equal(it.key, e.key)).length).toBe(1);
     }
     return entries.slice(1).reduce(
         (result, entry) => result.assoc(0, entry),

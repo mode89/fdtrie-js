@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-export function is(x, y) {
+export function equal(x, y) {
     return _.isEqual(x, y);
 }
 
