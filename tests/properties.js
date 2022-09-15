@@ -145,14 +145,12 @@ function genMapAndOps() {
 
 function genMap(knownKeys, knownValues) {
     return fc.uniqueArray(fc.constantFrom(...knownKeys)).chain(
-        keys => {
-            const m = new Map();
-            const values = fc.constantFrom(...knownValues);
-            for (const k of keys) {
-                m.set(k, fc.sample(values, 1)[0])
-            }
-            return fc.constant(m);
-        })
+        keys => fc.infiniteStream(fc.constantFrom(...knownValues)).chain(
+            valuesStream => {
+                const values = Array.from(valuesStream.take(keys.length));
+                const m = new Map(_.zip(keys, values));
+                return fc.constant(m);
+            }));
 }
 
 function genKeyValuePairs() {
