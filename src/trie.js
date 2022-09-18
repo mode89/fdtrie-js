@@ -6,7 +6,6 @@ export class Entry {
         this.keyHash = keyHash;
         this.key = key;
         this.value = value;
-        Object.freeze(this);
     }
 
     countEntries() {
@@ -78,7 +77,6 @@ export class ArrayNode {
         this.children = children;
         this.childrenCount = childrenCount;
         this.entryCount = entryCount;
-        Object.freeze(this);
     }
 
     countEntries() {
@@ -259,7 +257,6 @@ export class CollisionNode {
     constructor(children, keyHash) {
         this.children = children;
         this.keyHash = keyHash;
-        Object.freeze(this);
     }
 
     countEntries() {
@@ -355,7 +352,6 @@ export class TrieSeq {
         this.root = root;
         this.entry = entry;
         this.entryIndex = entryIndex;
-        Object.freeze(this);
     }
 
     first() {
