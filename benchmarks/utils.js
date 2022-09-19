@@ -1,15 +1,16 @@
 import bm from "benchmark";
 
-export function suite(name) {
+export function suite(name, units = "ms") {
     return new bm.Suite(name)
     .on("start", (s) => {
         console.log(s.currentTarget.name);
     })
     .on("cycle", (event) => {
         const b = event.target;
+        const mult = unitsMultiplier(units);
         console.log(
             "  " + b.name +
-            ": " + Math.floor(b.stats.mean * 1000) + " ms");
+            ": " + Math.floor(b.stats.mean * mult) + " " + units);
     })
 }
 
@@ -27,4 +28,12 @@ export function reduce(f, init, col) {
         result = f(result, it);
     }
     return result;
+}
+
+function unitsMultiplier(units) {
+    switch (units) {
+        case "ms": return 1000;
+        case "us": return 1000000;
+        default: throw "Unknown type of units: " + units;
+    }
 }
