@@ -12,10 +12,10 @@ test("build", () => fc.assert(
             const m = applyOpsToMap(ops, new Map());
             const pm = applyOpsToPHashMap(
                 ops, PHashMap.blank(testKeyHasher));
-            expectSimilar(m, pm, keys)
+            expectSimilar(m, pm, keys);
         }),
     { numRuns: 1000 }
-))
+));
 
 test("difference", () => fc.assert(
     fc.property(
@@ -37,7 +37,7 @@ test("difference", () => fc.assert(
                 keys);
         }),
     { numRuns: 1000 }
-))
+));
 
 test("entries", () => fc.assert(
     fc.property(
@@ -45,7 +45,7 @@ test("entries", () => fc.assert(
         kvs => {
             const m = kvs.reduce(
                 (mi, e) => mi.assoc(e[0], e[1]),
-                PHashMap.blank(testKeyHasher))
+                PHashMap.blank(testKeyHasher));
             const entries = Array.from(m.entries())
                 .map(e => [e.key, e.value]);
             const compare =
@@ -55,7 +55,7 @@ test("entries", () => fc.assert(
             expect(entries).toEqual(kvs);
         }),
     { numRuns: 1000 }
-))
+));
 
 test("hash", () => fc.assert(
     fc.property(
@@ -66,7 +66,7 @@ test("hash", () => fc.assert(
             expect(h).toBeLessThanOrEqual(0x7FFFFFFF);
         }),
     { numRuns: 10000 }
-))
+));
 
 function makePHashMapFromMap(m, keyHasher) {
     var pm = PHashMap.blank(keyHasher);
@@ -83,14 +83,14 @@ function applyOpsToMap(ops, m0) {
     }
     for (const op of ops) {
         switch (op.type) {
-            case "assoc":
-                m.set(op.key, op.value);
-                break;
-            case "dissoc":
-                m.delete(op.key);
-                break;
-            default:
-                throw "Unknown op: " + op.type;
+        case "assoc":
+            m.set(op.key, op.value);
+            break;
+        case "dissoc":
+            m.delete(op.key);
+            break;
+        default:
+            throw "Unknown op: " + op.type;
         }
     }
     return m;
@@ -100,12 +100,12 @@ function applyOpsToPHashMap(ops, m0) {
     return ops.reduce(
         (m, op) => {
             switch (op.type) {
-                case "assoc":
-                    return m.assoc(op.key, op.value);
-                case "dissoc":
-                    return m.dissoc(op.key);
-                default:
-                    throw "Unknown op: " + op.type;
+            case "assoc":
+                return m.assoc(op.key, op.value);
+            case "dissoc":
+                return m.dissoc(op.key);
+            default:
+                throw "Unknown op: " + op.type;
             }
         }, m0);
 }
@@ -124,7 +124,7 @@ function expectSimilar(m, pm, knownKeys) {
     const m2 = new Map();
     const notFound = new Object();
     for (const key of knownKeys) {
-        const value = pm.get(key, notFound)
+        const value = pm.get(key, notFound);
         if (value !== notFound) {
             m2.set(key, value);
         }
@@ -167,7 +167,7 @@ function genOpsAndKeys() {
     return genKeys().chain(
         keys => genValues().chain(
             values => genOps(keys, values).chain(
-                ops => fc.constant({ ops, keys }))))
+                ops => fc.constant({ ops, keys }))));
 }
 
 function genOps(keys, values) {
@@ -185,14 +185,14 @@ function genAssocOp(keys, values) {
         type: fc.constant("assoc"),
         key: fc.constantFrom(...keys),
         value: fc.constantFrom(...values),
-    })
+    });
 }
 
 function genDissocOp(keys) {
     return fc.record({
         type: fc.constant("dissoc"),
         key: fc.constantFrom(...keys)
-    })
+    });
 }
 
 function genKeys() {

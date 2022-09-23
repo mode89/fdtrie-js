@@ -24,26 +24,26 @@ const nm0 = utils.reduce(
     utils.range(100000));
 
 export const deleteSuite = utils.suite("Delete a key")
-.add("PHashMap", () => {
-    var m = pm0;
-    for (let i = 0; i < 100000; ++ i) {
-        m = m.dissoc(i);
-    }
-})
-.add("ImmutableJS", () => {
-    var m = im0;
-    for (let i = 0; i < 100000; ++ i) {
-        m = m.delete(i);
-    }
-})
-.add("Mori", () => {
-    var m = mm0;
-    for (let i = 0; i < 100000; ++ i) {
-        m = mori.dissoc(m, i);
-    }
-})
-.add("Native", () => {
-    for (let i = 0; i < 100000; ++ i) {
-        nm0.delete(i);
-    }
-})
+    .add("PHashMap", () => {
+        var m = pm0;
+        for (let i = 0; i < 100000; ++ i) {
+            m = m.dissoc(i);
+        }
+    })
+    .add("ImmutableJS", () => {
+        var m = im0;
+        for (let i = 0; i < 100000; ++ i) {
+            m = m.delete(i);
+        }
+    })
+    .add("Mori", () => {
+        var m = mm0;
+        for (let i = 0; i < 100000; ++ i) {
+            m = mori.dissoc(m, i);
+        }
+    })
+    .add("Native", () => {
+        for (let i = 0; i < 100000; ++ i) {
+            nm0.delete(i);
+        }
+    });

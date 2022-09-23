@@ -1,19 +1,19 @@
-import {hash} from "./utils.js"
-import {Entry, difference} from "./trie.js"
+import {hash} from "./utils.js";
+import {Entry, difference} from "./trie.js";
 
 export class PHashMap {
 
-    static #blankMapsCache = new Map([
+    static _blankMapsCache = new Map([
         [hash, new PHashMap(undefined, hash)],
-    ])
+    ]);
 
     static blank(hasher = hash) {
-        const cachedMap = PHashMap.#blankMapsCache.get(hasher)
+        const cachedMap = PHashMap._blankMapsCache.get(hasher);
         if (cachedMap !== undefined) {
             return cachedMap;
         } else {
             const newMap = new PHashMap(undefined, hasher);
-            PHashMap.#blankMapsCache.set(hasher, newMap);
+            PHashMap._blankMapsCache.set(hasher, newMap);
             return newMap;
         }
     }

@@ -24,23 +24,23 @@ const nm0 = utils.reduce(
     utils.range(100000));
 
 export const getSuite = utils.suite("Get a value by a key")
-.add("PHashMap", () => {
-    for (let i = 0; i < 100000; ++ i) {
-        pm0.get(i);
-    }
-})
-.add("ImmutableJS", () => {
-    for (let i = 0; i < 100000; ++ i) {
-        im0.get(i);
-    }
-})
-.add("Mori", () => {
-    for (let i = 0; i < 100000; ++ i) {
-        mori.get(mm0, i);
-    }
-})
-.add("Native", () => {
-    for (let i = 0; i < 100000; ++ i) {
-        nm0.get(i);
-    }
-})
+    .add("PHashMap", () => {
+        for (let i = 0; i < 100000; ++ i) {
+            pm0.get(i);
+        }
+    })
+    .add("ImmutableJS", () => {
+        for (let i = 0; i < 100000; ++ i) {
+            im0.get(i);
+        }
+    })
+    .add("Mori", () => {
+        for (let i = 0; i < 100000; ++ i) {
+            mori.get(mm0, i);
+        }
+    })
+    .add("Native", () => {
+        for (let i = 0; i < 100000; ++ i) {
+            nm0.get(i);
+        }
+    });

@@ -34,26 +34,26 @@ const mm3 = utils.reduce(
     utils.range(100000));
 
 export const singleKeyDifference = utils.suite("Single key difference", "us")
-.add("PHashMap", () => {
-    pm1.difference(pm2);
-})
-.add("ImmutableJS", () => {
-    immDiff(im1, im2);
-})
-.add("Mori", () => {
-    moriDiff(mm1, mm2);
-})
+    .add("PHashMap", () => {
+        pm1.difference(pm2);
+    })
+    .add("ImmutableJS", () => {
+        immDiff(im1, im2);
+    })
+    .add("Mori", () => {
+        moriDiff(mm1, mm2);
+    });
 
 export const allKeysDifference = utils.suite("All keys difference", "ms")
-.add("PHashMap", () => {
-    pm1.difference(pm3);
-})
-.add("ImmutableJS", () => {
-    immDiff(im1, im3);
-})
-.add("Mori", () => {
-    moriDiff(mm1, mm3);
-})
+    .add("PHashMap", () => {
+        pm1.difference(pm3);
+    })
+    .add("ImmutableJS", () => {
+        immDiff(im1, im3);
+    })
+    .add("Mori", () => {
+        moriDiff(mm1, mm3);
+    });
 
 function immDiff(m1, m2) {
     return m1.filter((v1, k) => {

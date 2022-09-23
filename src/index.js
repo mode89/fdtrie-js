@@ -1,4 +1,4 @@
-import {PHashMap} from "./map.js"
+import {PHashMap} from "./map.js";
 
 export {
     PHashMap,

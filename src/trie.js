@@ -1,4 +1,4 @@
-import * as utils from "./utils.js"
+import * as utils from "./utils.js";
 
 export class Entry {
 
@@ -134,9 +134,10 @@ export class ArrayNode {
                 } else {
                     // If only one child left and it isn't an ArrayNode,
                     // we should return this child, instead
+                    var returnChild = undefined;
                     if (newChildrenCount == 1) {
                         if (newChild !== undefined) {
-                            var returnChild = newChild instanceof ArrayNode
+                            returnChild = newChild instanceof ArrayNode
                                 ? undefined
                                 : newChild;
                         } else {
@@ -144,12 +145,10 @@ export class ArrayNode {
                             // have at least two entries under it
                             const lastChild = this.children
                                 .find(it => it !== undefined && it !== child);
-                            var returnChild = lastChild instanceof ArrayNode
+                            returnChild = lastChild instanceof ArrayNode
                                 ? undefined
                                 : lastChild;
                         }
-                    } else {
-                        var returnChild = undefined;
                     }
 
                     if (returnChild === undefined) {
@@ -170,63 +169,63 @@ export class ArrayNode {
 
     differenceImpl(other, shift) {
         switch (other.constructor) {
-            case ArrayNode: {
-                const children = new Array(32);
-                var childrenCount = 0;
-                var entryCount = 0;
-                var returnThis = true;
-                for (let i = 0; i < 32; i ++) {
-                    const thisChild = this.children[i];
-                    const otherChild = other.children[i];
-                    const newChild = difference(
-                        thisChild, otherChild, shift + 5);
-                    children[i] = newChild;
-                    if (newChild !== undefined) {
-                        childrenCount ++;
-                        entryCount += newChild.countEntries();
-                    }
-                    if (newChild !== thisChild) {
-                        returnThis = false;
-                    }
+        case ArrayNode: {
+            const children = new Array(32);
+            var childrenCount = 0;
+            var entryCount = 0;
+            var returnThis = true;
+            for (let i = 0; i < 32; i ++) {
+                const thisChild = this.children[i];
+                const otherChild = other.children[i];
+                const newChild = difference(
+                    thisChild, otherChild, shift + 5);
+                children[i] = newChild;
+                if (newChild !== undefined) {
+                    childrenCount ++;
+                    entryCount += newChild.countEntries();
                 }
-
-                if (childrenCount == 0) {
-                    return undefined;
-                } else if (returnThis) {
-                    return this;
-                } else {
-                    // If only one child left and it is not an ArrayNode,
-                    // we should return this child, instead
-                    const lastChild = childrenCount == 1
-                        ? children.find(
-                            it => (it !== undefined) &&
-                                  !(it instanceof ArrayNode))
-                        : undefined;
-
-                    return lastChild === undefined
-                        ? new ArrayNode(children, childrenCount, entryCount)
-                        : lastChild;
+                if (newChild !== thisChild) {
+                    returnThis = false;
                 }
             }
-            case Entry:
-                return differenceToEntry(this, other, shift);
-            case CollisionNode:
-                return other.children.reduce(
-                    (result, otherEntry) => {
-                        const thisEntry = result.getEntry(
-                            shift, otherEntry.keyHash, otherEntry.key);
-                        if (thisEntry !== undefined
+
+            if (childrenCount == 0) {
+                return undefined;
+            } else if (returnThis) {
+                return this;
+            } else {
+                // If only one child left and it is not an ArrayNode,
+                // we should return this child, instead
+                const lastChild = childrenCount == 1
+                    ? children.find(
+                        it => (it !== undefined) &&
+                                  !(it instanceof ArrayNode))
+                    : undefined;
+
+                return lastChild === undefined
+                    ? new ArrayNode(children, childrenCount, entryCount)
+                    : lastChild;
+            }
+        }
+        case Entry:
+            return differenceToEntry(this, other, shift);
+        case CollisionNode:
+            return other.children.reduce(
+                (result, otherEntry) => {
+                    const thisEntry = result.getEntry(
+                        shift, otherEntry.keyHash, otherEntry.key);
+                    if (thisEntry !== undefined
                             && (thisEntry === otherEntry
                                 || utils.equal(
                                     thisEntry.value,
                                     otherEntry.value))) {
-                            return result.dissoc(
-                                shift, otherEntry.keyHash, otherEntry.key);
-                        } else {
-                            return result;
-                        }
-                    }, this);
-            default: throw "Unexpected type of node";
+                        return result.dissoc(
+                            shift, otherEntry.keyHash, otherEntry.key);
+                    } else {
+                        return result;
+                    }
+                }, this);
+        default: throw "Unexpected type of node";
         }
     }
 
@@ -310,7 +309,7 @@ export class CollisionNode {
                 } else {
                     // Should always succeed, because CollisionNode must
                     // have at least two children
-                    return this.children.find(ch => !utils.equal(ch.key, key))
+                    return this.children.find(ch => !utils.equal(ch.key, key));
                 }
             }
         }
@@ -327,7 +326,7 @@ export class CollisionNode {
                     return otherEntry === undefined
                         ? true
                         : !utils.equal(thisEntry.value, otherEntry.value);
-                })
+                });
             if (children.length == 0) {
                 return undefined;
             } else if (children.length == 1) {
