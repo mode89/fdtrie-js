@@ -11,6 +11,9 @@
   "homepage": "https://github.com/mode89/fdtrie-js",
   "type": "module",
   "main": "src/index.js",
+  "files": [
+      "src/*.js"
+  ],
   "scripts": {
     "bench": "node benchmarks/main.js",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
