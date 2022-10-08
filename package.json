@@ -37,6 +37,7 @@
     "mori": "^0.3.2"
   },
   "dependencies": {
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "safe-stable-stringify": "^2.4.0"
   }
 }

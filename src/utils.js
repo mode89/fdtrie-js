@@ -1,4 +1,5 @@
 import _ from "lodash";
+import stringify from "safe-stable-stringify"
 
 export function equal(x, y) {
     return _.isEqual(x, y);
@@ -30,7 +31,7 @@ export function hash(x) {
     } else if (x === null || x === undefined) {
         return 0;
     } else {
-        return hashString(0, JSON.stringify(x));
+        return hashString(0, stringify(x));
     }
 }
 
