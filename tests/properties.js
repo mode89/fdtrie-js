@@ -113,7 +113,7 @@ function applyOpsToPHashMap(ops, m0) {
 function mapDifference(lMap, rMap) {
     const m = new Map();
     for (const [key, lValue] of lMap.entries()) {
-        if (!rMap.has(key) || !_.isEqual(lValue, rMap.get(key))) {
+        if (!rMap.has(key) || lValue !== rMap.get(key)) {
             m.set(key, lValue);
         }
     }
@@ -215,7 +215,23 @@ function genKeys() {
 }
 
 function genValues() {
-    return fc.uniqueArray(genObject(), {minLength: 1, size: "medium"});
+    return fc.uniqueArray(
+        fc.anything({
+            values: [
+                fc.boolean(),
+                fc.integer(),
+                fc.double({
+                    // Because NaN !== NaN messes up map difference
+                    noNaN: true,
+                }),
+                fc.string(),
+                fc.oneof(
+                    fc.constant(null),
+                    fc.constant(undefined),
+                ),
+            ]
+        }),
+        {minLength: 1, size: "medium"});
 }
 
 function genObject() {

@@ -84,7 +84,8 @@ describe("PHashMap", () => {
             const v2 = {b: 2, a: 1};
             const m1 = PHashMap.blank().assoc(42, v1);
             const m2 = m1.assoc(42, v2);
-            expect(m2).toBe(m1);
+            expect(m2).not.toBe(m1);
+            expect(m2).toStrictEqual(m1);
         });
 
         test("keep hasher", () => {

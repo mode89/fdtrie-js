@@ -14,7 +14,7 @@ export class Entry {
 
     assoc(shift, entry) {
         if (utils.equal(this.key, entry.key)) {
-            if (utils.equal(this.value, entry.value))
+            if (this.value === entry.value)
                 return this;
             else
                 return entry;
@@ -46,7 +46,7 @@ export class Entry {
     differenceImpl(other, shift) {
         if (other instanceof Entry) {
             if (utils.equal(this.key, other.key) &&
-                utils.equal(this.value, other.value)) {
+                this.value === other.value) {
                 return undefined;
             } else {
                 return this;
@@ -55,8 +55,8 @@ export class Entry {
             const otherE = other.getEntry(shift, this.keyHash, this.key);
             if (otherE === undefined) {
                 return this;
-            } else if (utils.equal(this, otherE) ||
-                       utils.equal(this.value, otherE.value)) {
+            } else if (this === otherE ||
+                       this.value === otherE.value) {
                 return undefined;
             } else {
                 return this;
@@ -216,9 +216,7 @@ export class ArrayNode {
                         shift, otherEntry.keyHash, otherEntry.key);
                     if (thisEntry !== undefined
                             && (thisEntry === otherEntry
-                                || utils.equal(
-                                    thisEntry.value,
-                                    otherEntry.value))) {
+                                || thisEntry.value === otherEntry.value)) {
                         return result.dissoc(
                             shift, otherEntry.keyHash, otherEntry.key);
                     } else {
@@ -272,7 +270,7 @@ export class CollisionNode {
                     this.keyHash);
             } else {
                 const child = this.children[childIndex];
-                if (utils.equal(child.value, entry.value)) {
+                if (child.value === entry.value) {
                     return this;
                 } else {
                     return new CollisionNode(
@@ -325,7 +323,7 @@ export class CollisionNode {
                         shift, thisEntry.keyHash, thisEntry.key);
                     return otherEntry === undefined
                         ? true
-                        : !utils.equal(thisEntry.value, otherEntry.value);
+                        : thisEntry.value !== otherEntry.value;
                 });
             if (children.length == 0) {
                 return undefined;
@@ -378,7 +376,7 @@ function differenceToEntry(rNode, lEntry, shift) {
     if (rEntry === undefined) {
         return rNode;
     } else if (rEntry === lEntry ||
-               utils.equal(rEntry.value, lEntry.value)) {
+               rEntry.value === lEntry.value) {
         return rNode.dissoc(shift, lEntry.keyHash, lEntry.key);
     } else {
         return rNode;
