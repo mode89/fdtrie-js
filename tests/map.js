@@ -174,6 +174,26 @@ describe("PHashMap", () => {
         });
     });
 
+    describe("reduceDifference", () => {
+
+        test("add, remove, change", () => {
+            const m1 = PHashMap.blank().assoc(1, 2).assoc(3, 4);
+            const m2 = PHashMap.blank().assoc(5, 6).assoc(3, 7);
+            const acc = m1.reduceDifference(m2, 0, {
+                onRemoved: (e, acc) => acc + 1000 * e.value,
+                onAdded: (e, acc) => acc + 100 * e.value,
+                onChanged: (l, r, acc) => acc + 10 * l.value + r.value });
+            expect(acc).toBe(2647);
+        });
+
+        test("default callbacks", () => {
+            const m1 = PHashMap.blank().assoc(1, 2).assoc(3, 4);
+            const m2 = PHashMap.blank().assoc(5, 6).assoc(3, 7);
+            const acc = m1.reduceDifference(m2, 42, {});
+            expect(acc).toBe(42);
+        });
+    });
+
     describe("seq", () => {
 
         test("blank", () => {

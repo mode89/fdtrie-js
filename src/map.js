@@ -1,5 +1,5 @@
 import {hash} from "./utils.js";
-import {Entry, difference} from "./trie.js";
+import {Entry, difference, reduceDifference} from "./trie.js";
 
 export class PHashMap {
 
@@ -84,6 +84,16 @@ export class PHashMap {
         } else {
             return new PHashMap(rootDiff, this.keyHasher);
         }
+    }
+
+    reduceDifference(other, acc,
+        {
+            onRemoved = (e, acc) => acc,
+            onChanged = (oldE, newE, acc) => acc,
+            onAdded = (e, acc) => acc,
+        }) {
+        return reduceDifference(
+            this.root, other.root, acc, 0, onRemoved, onChanged, onAdded);
     }
 
     seq() {

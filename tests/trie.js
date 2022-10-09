@@ -2,8 +2,10 @@ import {ArrayNode,
     Entry,
     CollisionNode,
     difference,
+    reduceDifference,
     makeArrayNode} from "trie.js";
 import {equal} from "utils.js";
+import _ from "lodash";
 
 describe("assoc", () => {
     describe("Entry", () => {
@@ -468,6 +470,244 @@ describe("difference", () => {
                 expect(d.getEntry(0, 3, 3)).toBeUndefined();
                 expect(d.getEntry(0, 4, 4)).toBeUndefined();
             });
+        });
+    });
+});
+
+describe("reduceDifference", () => {
+
+    const initAcc = {};
+    const onRemoved = (e, acc) => {
+        acc = _.cloneDeep(acc);
+        const v = e.value;
+        if ("remove" in acc) {
+            acc.remove.push(v);
+            acc.remove.sort();
+        } else {
+            acc.remove = [v];
+        }
+        return acc;
+    };
+    const onAdded = (e, acc) => {
+        acc = _.cloneDeep(acc);
+        const v = e.value;
+        if ("add" in acc) {
+            acc.add.push(v);
+            acc.add.sort();
+        } else {
+            acc.add = [v];
+        }
+        return acc;
+    };
+    const onChagned = (eOld, eNew, acc) => {
+        acc = _.cloneDeep(acc);
+        const v = [eOld.value, eNew.value];
+        if ("change" in acc) {
+            acc.change.push(v);
+            acc.change.sort();
+        } else {
+            acc.change = [v];
+        }
+        return acc;
+    };
+
+    describe("common", () => {
+        test("same", () => {
+            const c = makeCollisionNode(
+                new Entry(1, 1, 1), new Entry(1, 2, 2));
+            const acc = reduceDifference(
+                c, c, initAcc, 0, onRemoved, onChagned, onAdded);
+            expect(acc).toBe(initAcc);
+        });
+        test("remove all", () => {
+            const c = makeCollisionNode(
+                new Entry(1, 1, 1), new Entry(1, 2, 2));
+            const acc = reduceDifference(
+                c, undefined, initAcc, 0, onRemoved, onChagned, onAdded);
+            expect(acc).toStrictEqual({ remove: [1, 2] });
+        });
+        test("add all", () => {
+            const c = makeArrayNodeOf(
+                new Entry(1, 1, 1), new Entry(2, 2, 2));
+            const acc = reduceDifference(
+                undefined, c, initAcc, 0, onRemoved, onChagned, onAdded);
+            expect(acc).toStrictEqual({ add: [1, 2] });
+        });
+    });
+    describe("Entry", () => {
+        describe("and Entry", () => {
+            test("equal", () => {
+                const e1 = new Entry(1, 1, 1);
+                const e2 = new Entry(1, 1, 1);
+                const acc = e1.reduceDifferenceImpl(
+                    e2, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toBe(initAcc);
+            });
+            test("changed", () => {
+                const e1 = new Entry(1, 1, 1);
+                const e2 = new Entry(1, 1, 2);
+                const acc = e1.reduceDifferenceImpl(
+                    e2, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual({ change: [[1, 2]] });
+            });
+            test("different key", () => {
+                const e1 = new Entry(1, 1, 1);
+                const e2 = new Entry(2, 2, 2);
+                const acc = e1.reduceDifferenceImpl(
+                    e2, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual({ add: [2], remove: [1] });
+            });
+            test("different key, same hash", () => {
+                const e1 = new Entry(1, 1, 1);
+                const e2 = new Entry(1, 2, 2);
+                const acc = e1.reduceDifferenceImpl(
+                    e2, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual({ add: [2], remove: [1] });
+            });
+        });
+        describe("and ArrayNode", () => {
+            test("only add", () => {
+                const e = new Entry(1, 1, 1);
+                const a = makeArrayNodeOf(
+                    new Entry(1, 1, 1), new Entry(2, 2, 2));
+                const acc = e.reduceDifferenceImpl(
+                    a, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual({ add: [2] });
+            });
+            test("add & change", () => {
+                const e = new Entry(1, 1, 1);
+                const a = makeArrayNodeOf(
+                    new Entry(1, 1, 2), new Entry(3, 3, 3));
+                const acc = e.reduceDifferenceImpl(
+                    a, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual({ add: [3], change: [[1, 2]] });
+            });
+            test("add & remove", () => {
+                const e = new Entry(1, 1, 1);
+                const a = makeArrayNodeOf(
+                    new Entry(3, 3, 3), new Entry(2, 2, 2));
+                const acc = e.reduceDifferenceImpl(
+                    a, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual({ add: [2, 3], remove: [1] });
+            });
+        });
+        describe("and CollisionNode", () => {
+            test("add & change", () => {
+                const e = new Entry(1, 1, 1);
+                const c = makeCollisionNode(
+                    new Entry(1, 1, 2), new Entry(1, 2, 3));
+                const acc = e.reduceDifferenceImpl(
+                    c, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual({ add: [3], change: [[1, 2]],
+                });
+            });
+            test("add & remove", () => {
+                const e = new Entry(1, 1, 1);
+                const c = makeCollisionNode(
+                    new Entry(1, 2, 2), new Entry(1, 3, 3));
+                const acc = e.reduceDifferenceImpl(
+                    c, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual({ add: [2, 3], remove: [1] });
+            });
+        });
+    });
+    describe("CollisionNode", () => {
+        describe("and Entry", () => {
+            test("remove", () => {
+                const e = new Entry(1, 1, 1);
+                const c = makeCollisionNode(
+                    new Entry(1, 1, 1), new Entry(1, 2, 2));
+                const acc = c.reduceDifferenceImpl(
+                    e, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual({ remove: [2] });
+            });
+            test("add & remove", () => {
+                const e = new Entry(1, 1, 1);
+                const c = makeCollisionNode(
+                    new Entry(1, 2, 2), new Entry(1, 3, 3));
+                const acc = c.reduceDifferenceImpl(
+                    e, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual({ add: [1], remove: [2, 3] });
+            });
+            test("change & remove", () => {
+                const e = new Entry(1, 1, 1);
+                const c = makeCollisionNode(
+                    new Entry(1, 1, 2), new Entry(1, 3, 3));
+                const acc = c.reduceDifferenceImpl(
+                    e, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual({ change: [[2, 1]], remove: [3] });
+            });
+        });
+        describe("and CollisionNode", () => {
+            test("different hash", () => {
+                const c1 = makeCollisionNode(
+                    new Entry(1, 1, 1), new Entry(1, 2, 2));
+                const c2 = makeCollisionNode(
+                    new Entry(2, 3, 3), new Entry(2, 4, 4));
+                const acc = c1.reduceDifferenceImpl(
+                    c2, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual({ add: [3, 4], remove: [1, 2] });
+            });
+            test("same hash", () => {
+                const c1 = makeCollisionNode(
+                    new Entry(1, 1, 1), new Entry(1, 2, 2));
+                const c2 = makeCollisionNode(
+                    new Entry(1, 1, 3), new Entry(1, 4, 4));
+                const acc = c1.reduceDifferenceImpl(
+                    c2, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual(
+                    { add: [4], remove: [2], change: [[1, 3]] });
+            });
+        });
+        test("and ArrayNode", () => {
+            const c = makeCollisionNode(
+                new Entry(1, 1, 1), new Entry(1, 2, 2));
+            const a = makeArrayNodeOf(
+                new Entry(1, 2, 3), new Entry(4, 4, 4));
+            const acc = c.reduceDifferenceImpl(
+                a, initAcc, 0, onRemoved, onChagned, onAdded);
+            expect(acc).toStrictEqual(
+                { add: [4], remove: [1], change: [[2, 3]] });
+        });
+    });
+    describe("ArrayNode", () => {
+        describe("and Entry", () => {
+            test("remove & change", () => {
+                const a = makeArrayNodeOf(
+                    new Entry(1, 1, 1), new Entry(2, 2, 2));
+                const e = new Entry(1, 1, 3);
+                const acc = a.reduceDifferenceImpl(
+                    e, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual({ remove: [2], change: [[1, 3]] });
+            });
+            test("add & remove", () => {
+                const a = makeArrayNodeOf(
+                    new Entry(1, 1, 1), new Entry(2, 2, 2));
+                const e = new Entry(3, 3, 3);
+                const acc = a.reduceDifferenceImpl(
+                    e, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual({ add: [3], remove: [1, 2] });
+            });
+        });
+        test("and CollisionNode", () => {
+            const a = makeArrayNodeOf(
+                new Entry(1, 1, 1), new Entry(2, 2, 2));
+            const c = makeCollisionNode(
+                new Entry(1, 1, 3), new Entry(1, 4, 4));
+            const acc = a.reduceDifferenceImpl(
+                c, initAcc, 0, onRemoved, onChagned, onAdded);
+            expect(acc).toStrictEqual(
+                { add: [4], remove: [2], change: [[1, 3]] });
+        });
+        describe("and ArrayNode", () => {
+            const a1 = makeArrayNodeOf(
+                new Entry(1, 1, 1), new Entry(2, 2, 2));
+            const a2 = makeArrayNodeOf(
+                new Entry(1, 1, 3), new Entry(4, 4, 4));
+            const acc = a1.reduceDifferenceImpl(
+                a2, initAcc, 0, onRemoved, onChagned, onAdded);
+            expect(acc).toStrictEqual(
+                { add: [4], remove: [2], change: [[1, 3]] });
         });
     });
 });

@@ -64,6 +64,48 @@ export class Entry {
         }
     }
 
+    reduceDifferenceImpl(other, acc, shift, onRemoved, onChanged, onAdded) {
+        if (other instanceof Entry) {
+            if (this.keyHash === other.keyHash) {
+                if (utils.equal(this.key, other.key)) {
+                    if (this.value !== other.value) {
+                        return onChanged(this, other, acc);
+                    } else {
+                        return acc;
+                    }
+                } else {
+                    acc = onRemoved(this, acc);
+                    acc = onAdded(other, acc);
+                    return acc;
+                }
+            } else {
+                acc = onRemoved(this, acc);
+                acc = onAdded(other, acc);
+                return acc;
+            }
+        } else {
+            var otherHasThisKey = false;
+            other.forEach(otherE => {
+                if (this.keyHash === otherE.keyHash) {
+                    if (utils.equal(this.key, otherE.key)) {
+                        otherHasThisKey = true;
+                        if (this.value !== otherE.value) {
+                            acc = onChanged(this, otherE, acc);
+                        }
+                    } else {
+                        acc = onAdded(otherE, acc);
+                    }
+                } else {
+                    acc = onAdded(otherE, acc);
+                }
+            });
+            if (!otherHasThisKey) {
+                acc = onRemoved(this, acc);
+            }
+            return acc;
+        }
+    }
+
     next(shift, prev) {
         return prev === undefined
             ? this
@@ -231,6 +273,24 @@ export class ArrayNode {
         }
     }
 
+    reduceDifferenceImpl(other, acc, shift, onRemoved, onChanged, onAdded) {
+        if (other instanceof ArrayNode) {
+            for (let i = 0; i < 32; i ++) {
+                const thisC = this.children[i];
+                const otherC = other.children[i];
+                acc = reduceDifference(thisC, otherC, acc, shift,
+                    onRemoved, onChanged, onAdded);
+            }
+            return acc;
+        } else {
+            return other.reduceDifferenceImpl(
+                this, acc, shift,
+                onAdded,
+                (oldE, newE, acc) => onChanged(newE, oldE, acc),
+                onRemoved);
+        }
+    }
+
     next(shift, prev) {
         const childIndex = prev === undefined
             ? 0
@@ -348,6 +408,43 @@ export class CollisionNode {
         }
     }
 
+    reduceDifferenceImpl(other, acc, shift, onRemoved, onChanged, onAdded) {
+        if (other instanceof Entry) {
+            return other.reduceDifferenceImpl(
+                this, acc, shift,
+                onAdded,
+                (oldE, newE, acc) => onChanged(newE, oldE, acc),
+                onRemoved);
+        } else if (other instanceof CollisionNode
+                   && this.keyHash !== other.keyHash) {
+            this.forEach(e => {
+                acc = onRemoved(e, acc);
+            });
+            other.forEach(e => {
+                acc = onAdded(e, acc);
+            });
+            return acc;
+        } else {
+            this.forEach(thisE => {
+                const otherE = other.getEntry(
+                    shift, thisE.keyHash, thisE.key);
+                if (otherE === undefined) {
+                    acc = onRemoved(thisE, acc);
+                }
+            });
+            other.forEach(otherE => {
+                const thisE = this.getEntry(
+                    shift, otherE.keyHash, otherE.key);
+                if (thisE === undefined) {
+                    acc = onAdded(otherE, acc);
+                } else if (thisE.value !== otherE.value) {
+                    acc = onChanged(thisE, otherE, acc);
+                }
+            });
+            return acc;
+        }
+    }
+
     next(shift, prev) {
         const nextIndex = (prev === undefined)
             ? 0
@@ -384,6 +481,25 @@ function differenceToEntry(rNode, lEntry, shift) {
     } else {
         return rNode;
     }
+}
+
+export function reduceDifference(
+    lNode, rNode, acc, shift, onRemoved, onChanged, onAdded) {
+    if (lNode !== rNode) {
+        if (rNode === undefined) {
+            lNode.forEach(e => {
+                acc = onRemoved(e, acc);
+            });
+        } else if (lNode === undefined) {
+            rNode.forEach(e => {
+                acc = onAdded(e, acc);
+            });
+        } else {
+            return lNode.reduceDifferenceImpl(
+                rNode, acc, shift, onRemoved, onChanged, onAdded);
+        }
+    }
+    return acc;
 }
 
 export function makeArrayNode(node, shift) {
