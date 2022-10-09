@@ -104,6 +104,15 @@ export class PHashMap {
             }
         }
     }
+
+    forEach(callback) {
+        if (typeof callback !== "function") {
+            throw new TypeError("Argument of forEach() must be a function");
+        }
+        if (this.root !== undefined) {
+            this.root.forEach(callback);
+        }
+    }
 }
 
 class PHashMapSeq {

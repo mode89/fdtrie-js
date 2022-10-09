@@ -235,4 +235,12 @@ describe("PHashMap", () => {
         const m = PHashMap.blank();
         expect(Array.from(m.entries()).length).toBe(0);
     });
+
+    test("forEach", () => {
+        const m = PHashMap.blank().assoc(1, 2).assoc(3, 4);
+        const es = [];
+        m.forEach(e => es.push([e.key, e.value]));
+        es.sort();
+        expect(es).toEqual([[1, 2], [3, 4]]);
+    });
 });

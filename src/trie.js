@@ -69,6 +69,10 @@ export class Entry {
             ? this
             : undefined;
     }
+
+    forEach(callback) {
+        callback(this);
+    }
 }
 
 export class ArrayNode {
@@ -246,6 +250,14 @@ export class ArrayNode {
         }
         return undefined;
     }
+
+    forEach(callback) {
+        for (const child of this.children) {
+            if (child !== undefined) {
+                child.forEach(callback);
+            }
+        }
+    }
 }
 
 export class CollisionNode {
@@ -343,6 +355,12 @@ export class CollisionNode {
         return nextIndex < this.children.length
             ? this.children[nextIndex]
             : undefined;
+    }
+
+    forEach(callback) {
+        for (const child of this.children) {
+            callback(child);
+        }
     }
 }
 

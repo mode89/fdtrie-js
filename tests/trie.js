@@ -533,6 +533,31 @@ describe("next", () => {
     });
 });
 
+describe("forEach", () => {
+    test("Entry", () => {
+        const e = new Entry(0, 0, 0);
+        const es = [];
+        e.forEach(x => es.push(x));
+        expect(es).toEqual([e]);
+    });
+    test("CollisionNode", () => {
+        const e1 = new Entry(1, 1, 1);
+        const e2 = new Entry(1, 2, 2);
+        const c = makeCollisionNode(e1, e2);
+        const es = [];
+        c.forEach(x => es.push(x));
+        expect(es).toEqual([e1, e2]);
+    });
+    test("ArrayNode", () => {
+        const e1 = new Entry(1, 1, 1);
+        const e2 = new Entry(2, 2, 2);
+        const a = makeArrayNodeOf(e1, e2);
+        const es = [];
+        a.forEach(x => es.push(x));
+        expect(es).toEqual([e1, e2]);
+    });
+});
+
 function makeCollisionNode() {
     const entries = [...arguments];
     expect(entries.length).toBeGreaterThan(1);
