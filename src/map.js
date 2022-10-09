@@ -1,26 +1,33 @@
-import {hash} from "./utils.js";
+import {equal, hash} from "./utils.js";
 import {Entry, difference} from "./trie.js";
 
 export class PHashMap {
 
+    static _DEFAULT_OPTIONS = {
+        keyEquality: equal,
+        keyHashing: hash,
+    };
+
     static _blankMapsCache = new Map([
-        [hash, new PHashMap(undefined, hash)],
+        [PHashMap._DEFAULT_OPTIONS,
+            new PHashMap(undefined, PHashMap._DEFAULT_OPTIONS)],
     ]);
 
-    static blank(hasher = hash) {
-        const cachedMap = PHashMap._blankMapsCache.get(hasher);
+    static blank(options = PHashMap._DEFAULT_OPTIONS) {
+        const cachedMap = PHashMap._blankMapsCache.get(options);
         if (cachedMap !== undefined) {
             return cachedMap;
         } else {
-            const newMap = new PHashMap(undefined, hasher);
-            PHashMap._blankMapsCache.set(hasher, newMap);
+            const newMap = new PHashMap(undefined, options);
+            PHashMap._blankMapsCache.set(options, newMap);
             return newMap;
         }
     }
 
-    constructor(root, keyHasher) {
+    constructor(root, options) {
         this.root = root;
-        this.keyHasher = keyHasher;
+        this.keyHasher = options.keyHashing;
+        this.keyEquality = options.keyEquality;
     }
 
     count() {

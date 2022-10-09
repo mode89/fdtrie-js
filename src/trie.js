@@ -2,7 +2,8 @@ import * as utils from "./utils.js";
 
 export class Entry {
 
-    constructor(keyHash, key, value) {
+    constructor(keyEquality, keyHash, key, value) {
+        this.keyEquality = keyEquality;
         this.keyHash = keyHash;
         this.key = key;
         this.value = value;
@@ -13,7 +14,7 @@ export class Entry {
     }
 
     assoc(shift, entry) {
-        if (utils.equal(this.key, entry.key)) {
+        if (this.keyEquality(this.key, entry.key)) {
             if (this.value === entry.value)
                 return this;
             else
@@ -28,7 +29,7 @@ export class Entry {
     }
 
     getEntry(shift, keyHash, key) {
-        if (this.keyHash == keyHash && utils.equal(this.key, key)) {
+        if (this.keyHash == keyHash && this.keyEquality(this.key, key)) {
             return this;
         } else {
             return undefined;
@@ -36,7 +37,7 @@ export class Entry {
     }
 
     dissoc(shift, keyHash, key) {
-        if (this.keyHash == keyHash && utils.equal(this.key, key)) {
+        if (this.keyHash == keyHash && this.keyEquality(this.key, key)) {
             return undefined;
         } else {
             return this;
@@ -45,7 +46,7 @@ export class Entry {
 
     differenceImpl(other, shift) {
         if (other instanceof Entry) {
-            if (utils.equal(this.key, other.key) &&
+            if (this.keyEquality(this.key, other.key) &&
                 this.value === other.value) {
                 return undefined;
             } else {
@@ -262,7 +263,7 @@ export class CollisionNode {
     assoc(shift, entry) {
         if (this.keyHash == entry.keyHash) {
             const childIndex = this.children
-                .findIndex(ch => utils.equal(ch.key, entry.key));
+                .findIndex(ch => ch.keyEquality(ch.key, entry.key));
             if (childIndex == -1) {
                 return new CollisionNode(
                     utils.immArrayAdd(this.children, entry),
@@ -284,7 +285,7 @@ export class CollisionNode {
 
     getEntry(shift, keyHash, key) {
         if (this.keyHash === keyHash) {
-            return this.children.find(it => utils.equal(it.key, key));
+            return this.children.find(it => it.keyEquality(it.key, key));
         } else {
             return undefined;
         }
@@ -295,7 +296,7 @@ export class CollisionNode {
             return this;
         } else {
             const childIndex = this.children
-                .findIndex(ch => utils.equal(ch.key, key));
+                .findIndex(ch => ch.keyEquality(ch.key, key));
             if (childIndex == -1) {
                 return this;
             } else {
@@ -306,7 +307,8 @@ export class CollisionNode {
                 } else {
                     // Should always succeed, because CollisionNode must
                     // have at least two children
-                    return this.children.find(ch => !utils.equal(ch.key, key));
+                    return this.children.find(
+                        ch => !ch.keyEquality(ch.key, key));
                 }
             }
         }

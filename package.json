@@ -12,11 +12,11 @@
   "type": "module",
   "main": "src/index.js",
   "files": [
-      "src/*.js"
+    "src/*.js"
   ],
   "scripts": {
     "bench": "node benchmarks/main.js",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage tests/map.js tests/trie.js",
     "test-props": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage tests/properties.js"
   },
   "jest": {

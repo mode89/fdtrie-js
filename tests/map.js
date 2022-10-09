@@ -10,10 +10,13 @@ describe("PHashMap", () => {
             expect(m.count()).toBe(0);
         });
 
-        test("hasher", () => {
-            const hasher = x => x;
-            const m = PHashMap.blank(hasher);
-            expect(m).toBe(PHashMap.blank(hasher));
+        test("options", () => {
+            const options = {
+                keyHashing: x => x,
+                keyEquality: (x, y) => x === y,
+            };
+            const m = PHashMap.blank(options);
+            expect(m).toBe(PHashMap.blank(options));
             expect(m).not.toBe(PHashMap.blank());
             expect(m.count()).toBe(0);
         });
@@ -88,12 +91,17 @@ describe("PHashMap", () => {
             expect(m2).toStrictEqual(m1);
         });
 
-        test("keep hasher", () => {
-            const hasher = x => x;
-            const m0 = PHashMap.blank(hasher);
+        test("keep options", () => {
+            const options = {
+                keyHashing: x => x,
+                keyEquality: (x, y) => x === y,
+            };
+            const m0 = PHashMap.blank(options);
             const m1 = m0.assoc(1, 42);
-            expect(m0.keyHasher).toBe(hasher);
-            expect(m1.keyHasher).toBe(hasher);
+            expect(m0.keyHasher).toBe(options.keyHashing);
+            expect(m0.keyEquality).toBe(options.keyEquality);
+            expect(m1.keyHasher).toBe(options.keyHashing);
+            expect(m1.keyEquality).toBe(options.keyEquality);
         });
     });
 
