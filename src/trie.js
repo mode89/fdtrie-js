@@ -64,9 +64,9 @@ export class Entry {
         }
     }
 
-    seq(root, shift, keyHash, entryIndex) {
-        return entryIndex === 0
-            ? new TrieSeq(root, this, 0)
+    next(shift, prev) {
+        return prev === undefined
+            ? this
             : undefined;
     }
 }
@@ -227,21 +227,20 @@ export class ArrayNode {
         }
     }
 
-    seq(root, shift, keyHash, entryIndex) {
-        const childIndex = arrayIndex(shift, keyHash);
+    next(shift, prev) {
+        const childIndex = prev === undefined
+            ? 0
+            : arrayIndex(shift, prev.keyHash);
         for (let i = childIndex; i < 32; i ++) {
             const child = this.children[i];
             if (child !== undefined) {
-                const s = child.seq(root, shift + 5, keyHash, entryIndex);
-                if (s !== undefined) {
-                    return s;
+                const nextOfChild = child.next(shift + 5, prev);
+                if (nextOfChild !== undefined) {
+                    return nextOfChild;
                 } else {
-                    // When the first ArrayNode's child is exhausted,
-                    // we look for the first entry in the next child
-                    entryIndex = 0;
-                    // Force searching to start from the first child
-                    // in the next ArrayNode
-                    keyHash = 0;
+                    // When reached end of a child, should start from
+                    // the beginning of the next child
+                    prev = undefined;
                 }
             }
         }
@@ -337,27 +336,13 @@ export class CollisionNode {
         }
     }
 
-    seq(root, shift, keyHash, entryIndex) {
-        return entryIndex < this.children.length
-            ? new TrieSeq(root, this.children[entryIndex], entryIndex)
+    next(shift, prev) {
+        const nextIndex = (prev === undefined)
+            ? 0
+            : (this.children.findIndex(e => e === prev) + 1);
+        return nextIndex < this.children.length
+            ? this.children[nextIndex]
             : undefined;
-    }
-}
-
-export class TrieSeq {
-    constructor(root, entry, entryIndex) {
-        this.root = root;
-        this.entry = entry;
-        this.entryIndex = entryIndex;
-    }
-
-    first() {
-        return this.entry;
-    }
-
-    next() {
-        return this.root.seq(
-            this.root, 0, this.entry.keyHash, this.entryIndex + 1);
     }
 }
 

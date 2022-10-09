@@ -1,7 +1,6 @@
 import {ArrayNode,
     Entry,
     CollisionNode,
-    TrieSeq,
     difference,
     makeArrayNode} from "trie.js";
 import {equal} from "utils.js";
@@ -473,77 +472,63 @@ describe("difference", () => {
     });
 });
 
-describe("seq", () => {
+describe("next", () => {
     describe("Entry", () => {
         test("hit", () => {
             const e = new Entry(1, 1, 1);
-            const s = e.seq(e, 0, 1, 0);
-            expect(s).toBeInstanceOf(TrieSeq);
-            expect(s.first()).toBe(e);
+            const n = e.next(0, undefined);
+            expect(n).toBe(e);
         });
         test("miss", () => {
             const e = new Entry(1, 1, 1);
-            const s = e.seq(e, 0, 1, 1);
-            expect(s).toBeUndefined();
+            const n = e.next(0, e);
+            expect(n).toBeUndefined();
         });
     });
     describe("CollisionNode", () => {
-        test("hit", () => {
+        test("return first entry", () => {
             const e1 = new Entry(1, 1, 1);
             const e2 = new Entry(1, 2, 2);
             const c = makeCollisionNode(e1, e2);
-            const s = c.seq(c, 0, 1, 1);
-            expect(s).toBeInstanceOf(TrieSeq);
-            expect(s.first()).toBe(e2);
+            const n = c.next(0, undefined);
+            expect(n).toBe(e1);
         });
-        test("miss", () => {
+        test("return middle entry", () => {
             const e1 = new Entry(1, 1, 1);
             const e2 = new Entry(1, 2, 2);
             const c = makeCollisionNode(e1, e2);
-            const s = c.seq(c, 0, 1, 2);
-            expect(s).toBeUndefined();
-        });
-    });
-    describe("ArrayNode", () => {
-        test("hit", () => {
-            const e0 = new Entry(0, 0, 0);
-            const e1 = new Entry(1, 1, 1);
-            const a = makeArrayNodeOf(e0, e1);
-            const s = a.seq(a, 0, 0, 0);
-            expect(s).toBeInstanceOf(TrieSeq);
-            expect(s.first()).toBe(e0);
-        });
-        test("reset keyHash to 0", () => {
-            const e1 = new Entry(2, 1, 0);
-            const e2 = new Entry(33, 2, 0);
-            const e3 = new Entry(34, 3, 0);
-            const a = makeArrayNodeOf(e1, e2, e3);
-            const s = a.seq(a, 0, 33, 1);
-            expect(s.first()).toBe(e1);
-        });
-        test("skip empty children", () => {
-            const e1 = new Entry(1, 1, 1);
-            const e2 = new Entry(3, 3, 3);
-            const a = makeArrayNodeOf(e1, e2);
-            const s = a.seq(a, 0, 1, 1);
-            expect(s.first()).toBe(e2);
+            const n = c.next(0, e1);
+            expect(n).toBe(e2);
         });
         test("finish", () => {
             const e1 = new Entry(1, 1, 1);
-            const e2 = new Entry(3, 3, 3);
-            const a = makeArrayNodeOf(e1, e2);
-            const s = a.seq(a, 0, 3, 1);
-            expect(s).toBeUndefined();
+            const e2 = new Entry(1, 2, 2);
+            const c = makeCollisionNode(e1, e2);
+            const n = c.next(0, e2);
+            expect(n).toBeUndefined();
         });
-        test("first", () => {
-            const e = new Entry(1, 1, 1);
-            const s = e.seq(e, 0, 1, 0);
-            expect(s.first()).toBe(e);
+    });
+    describe("ArrayNode", () => {
+        test("first child", () => {
+            const e0 = new Entry(0, 0, 0);
+            const e1 = new Entry(1, 1, 1);
+            const a = makeArrayNodeOf(e0, e1);
+            const n = a.next(0, undefined);
+            expect(n).toBe(e0);
         });
-        test("next", () => {
-            const e = new Entry(1, 1, 1);
-            const s = e.seq(e, 0, 1, 0);
-            expect(s.next()).toBeUndefined();
+        test("middle child", () => {
+            const e0 = new Entry(0, 0, 0);
+            const e1 = new Entry(1, 1, 1);
+            const a = makeArrayNodeOf(e0, e1);
+            const n = a.next(0, e0);
+            expect(n).toBe(e1);
+        });
+        test("last child", () => {
+            const e0 = new Entry(0, 0, 0);
+            const e1 = new Entry(1, 1, 1);
+            const a = makeArrayNodeOf(e0, e1);
+            const n = a.next(0, e1);
+            expect(n).toBeUndefined();
         });
     });
 });

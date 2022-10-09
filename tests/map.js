@@ -190,6 +190,32 @@ describe("PHashMap", () => {
             expect(e.key).toBe(k);
             expect(e.value).toBe(v);
         });
+
+        test("count", () => {
+            const m = PHashMap.blank().assoc(1, 2);
+            const s = m.seq();
+            expect(s.count()).toBe(1);
+        })
+
+        test("rest", () => {
+            const m = PHashMap.blank().assoc(1, 2).assoc(3, 4);
+            const s = m.seq().rest();
+            expect(s.count()).toBe(1);
+        })
+
+        test("empty seq", () => {
+            const m = PHashMap.blank().assoc(1, 2);
+            const s = m.seq().rest();
+            expect(s.count()).toBe(0);
+            expect(s.first()).toBeUndefined();
+        })
+
+        test("rest of empty seq", () => {
+            const m = PHashMap.blank().assoc(1, 2);
+            const s = m.seq().rest().rest();
+            expect(s.count()).toBe(0);
+            expect(s.first()).toBeUndefined();
+        })
     });
 
     test("entries", () => {
@@ -204,4 +230,9 @@ describe("PHashMap", () => {
             }
         }
     });
+
+    test("no entries", () => {
+        const m = PHashMap.blank();
+        expect(Array.from(m.entries()).length).toBe(0);
+    })
 });

@@ -88,13 +88,46 @@ export class PHashMap {
 
     seq() {
         return this.root !== undefined
-            ? this.root.seq(this.root, 0, 0, 0)
+            ? new PHashMapSeq(
+                this.root,
+                this.root.countEntries(),
+                this.root.next(0, undefined))
             : undefined;
     }
 
     *entries() {
-        for (let s = this.seq(); s !== undefined; s = s.next()) {
-            yield s.first();
+        if (this.root !== undefined) {
+            let e = this.root.next(0, undefined);
+            while (e !== undefined) {
+                yield e;
+                e = this.root.next(0, e);
+            }
         }
+    }
+}
+
+class PHashMapSeq {
+
+    constructor(root, count, first) {
+        this._root = root;
+        this._count = count;
+        this._first = first;
+    }
+
+    count() {
+        return this._count;
+    }
+
+    first() {
+        return this._first;
+    }
+
+    rest() {
+        return this._count > 1
+            ? new PHashMapSeq(
+                this._root,
+                this._count - 1,
+                this._root.next(0, this._first))
+            : new PHashMapSeq(undefined, 0, undefined);
     }
 }
