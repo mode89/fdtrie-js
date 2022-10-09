@@ -17,6 +17,7 @@
   "scripts": {
     "bench": "node benchmarks/main.js",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test-units": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage tests/map.js tests/trie.js tests/utils.js",
     "test-props": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage tests/properties.js"
   },
   "jest": {
