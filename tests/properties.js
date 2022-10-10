@@ -43,6 +43,45 @@ test("difference", () => fc.assert(
     { numRuns: NUM_RUNS }
 ));
 
+test("reduceDifference", () => fc.assert(
+    fc.property(
+        genMapAndOps(),
+        sample => {
+            const ops = sample.ops;
+            const m1 = sample.m;
+            const m2 = applyOpsToMap(ops, m1);
+            const pm1 = makePHashMapFromMap(m1, testKeyHasher);
+            const pm2 = applyOpsToPHashMap(ops, pm1);
+
+            const callbacks = {
+                remove: (e, acc) => {
+                    acc.push(["remove", e.key, e.value]);
+                    return acc;
+                },
+                change: (oldE, newE, acc) => {
+                    acc.push([
+                        "change",
+                        oldE.key, oldE.value,
+                        newE.key, newE.value]);
+                    return acc;
+                },
+                add: (e, acc) => {
+                    acc.push(["add", e.key, e.value]);
+                    return acc;
+                }
+            };
+
+            const bmd = builtinMapReduceDifference(m1, m2, [], callbacks);
+            const pmd = pm1.reduceDifference(pm2, [], callbacks);
+
+            bmd.sort(compareByStringify);
+            pmd.sort(compareByStringify);
+
+            expect(pmd).toStrictEqual(bmd);
+        }),
+    { numRuns: NUM_RUNS }
+));
+
 test("entries", () => fc.assert(
     fc.property(
         genKeyValuePairs(),
@@ -120,6 +159,29 @@ function mapDifference(lMap, rMap) {
         }
     }
     return m;
+}
+
+function builtinMapReduceDifference(
+    lMap, rMap, acc, { remove, change, add }) {
+    for (const [key, lValue] of lMap.entries()) {
+        if (rMap.has(key)) {
+            const rValue = rMap.get(key);
+            if (lValue !== rValue) {
+                acc = change(
+                    { key, value: lValue },
+                    { key, value: rValue },
+                    acc);
+            }
+        } else {
+            acc = remove({ key, value: lValue }, acc);
+        }
+    }
+    for (const [key, rValue] of rMap.entries()) {
+        if (!lMap.has(key)) {
+            acc = add({ key, value: rValue }, acc);
+        }
+    }
+    return acc;
 }
 
 function expectSimilar(m, pm, knownKeys) {
