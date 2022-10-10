@@ -700,14 +700,26 @@ describe("reduceDifference", () => {
                 { add: [4], remove: [2], change: [[1, 3]] });
         });
         describe("and ArrayNode", () => {
-            const a1 = makeArrayNodeOf(
-                new Entry(1, 1, 1), new Entry(2, 2, 2));
-            const a2 = makeArrayNodeOf(
-                new Entry(1, 1, 3), new Entry(4, 4, 4));
-            const acc = a1.reduceDifferenceImpl(
-                a2, initAcc, 0, onRemoved, onChagned, onAdded);
-            expect(acc).toStrictEqual(
-                { add: [4], remove: [2], change: [[1, 3]] });
+            test("add, remove, chanage", () => {
+                const a1 = makeArrayNodeOf(
+                    new Entry(1, 1, 1), new Entry(2, 2, 2));
+                const a2 = makeArrayNodeOf(
+                    new Entry(1, 1, 3), new Entry(4, 4, 4));
+                const acc = a1.reduceDifferenceImpl(
+                    a2, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual(
+                    { add: [4], remove: [2], change: [[1, 3]] });
+            });
+            test("nesting", () => {
+                const a1 = makeArrayNodeOf(
+                    new Entry(1, 1, 1),
+                    new Entry(2, 2, 2),
+                    new Entry(2, 3, 3));
+                const a2 = a1.assoc(0, new Entry(34, 4, 4));
+                const acc = a1.reduceDifferenceImpl(
+                    a2, initAcc, 0, onRemoved, onChagned, onAdded);
+                expect(acc).toStrictEqual({ add: [4] });
+            });
         });
     });
 });

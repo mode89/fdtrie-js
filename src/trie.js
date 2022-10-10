@@ -278,7 +278,7 @@ export class ArrayNode {
             for (let i = 0; i < 32; i ++) {
                 const thisC = this.children[i];
                 const otherC = other.children[i];
-                acc = reduceDifference(thisC, otherC, acc, shift,
+                acc = reduceDifference(thisC, otherC, acc, shift + 5,
                     onRemoved, onChanged, onAdded);
             }
             return acc;
