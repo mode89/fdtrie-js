@@ -51,6 +51,18 @@ for (const e of m1.entries()) {
 }
 ```
 
+Reduce difference between two maps by calling one of the callbacks
+(remove, change, add) on each of the differing entries
+```js
+const accInit = 0;
+const acc = m1.reduceDifference(m2, accInit, {
+    remove: (m1Entry, acc) => acc + m1Entry.key + m1Entry.value,
+    change: (m1Entry, m2Entry, acc) =>
+        acc + m1Entry.key + m1Entry.value + m2Entry.value,
+    add: (m2Entry, acc) => acc + m2Entry.key + m2Entry.value,
+});
+```
+
 Calculate difference (returns a map that holds key-value pairs of the first map, which don't present in the second map)
 ```js
 const m3 = m1.difference(m0);
