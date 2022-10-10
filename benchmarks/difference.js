@@ -33,7 +33,7 @@ const mm3 = utils.reduce(
     mm1,
     utils.range(100000));
 
-export const singleKeyDifference = utils.suite("Single key difference", "us")
+export const singleKeyDifference = utils.suite("Single key difference", "ns")
     .add("PHashMap", () => {
         pm1.difference(pm2);
     })
@@ -55,11 +55,60 @@ export const allKeysDifference = utils.suite("All keys difference", "ms")
         moriDiff(mm1, mm3);
     });
 
+export const reduceDiffSingleKey = utils.suite(
+    "Reduce difference (single key)", "ns")
+    .add("PHashMap", () => {
+        pm1.reduceDifference(pm2, 42, {});
+    })
+    .add("ImmutableJS", () => {
+        immReduceDiff(im1, im2, 42, {});
+    })
+    .add("Mori", () => {
+        moriReduceDiff(mm1, mm2, 42, {});
+    });
+
+export const reduceDiffAllKeys = utils.suite(
+    "Reduce difference (all keys)", "ms")
+    .add("PHashMap", () => {
+        pm1.reduceDifference(pm3, 42, {});
+    })
+    .add("ImmutableJS", () => {
+        immReduceDiff(im1, im3, 42, {});
+    })
+    .add("Mori", () => {
+        moriReduceDiff(mm1, mm3, 42, {});
+    });
+
 function immDiff(m1, m2) {
     return m1.filter((v1, k) => {
         const v2 = m2.get(k);
         return v1 !== v2;
     });
+}
+
+function immReduceDiff(m1, m2, acc, {
+    remove = (k, v, acc) => acc,
+    change = (k, oldV, newV, acc) => acc,
+    add = (k, v, acc) => acc, }) {
+
+    acc = m1.reduce(
+        (acc, v1, k) => {
+            return m1.has(k) ? acc : remove(k, v1, acc);
+        }, acc);
+
+    acc = m2.reduce(
+        (acc, v2, k) => {
+            const v1 = m1.get(k);
+            if (v1 === undefined) {
+                return add(k, v2, acc);
+            } else if (v1 !== v2) {
+                return change(k, v1, v2, acc);
+            } else {
+                return acc;
+            }
+        }, acc);
+
+    return acc;
 }
 
 function moriDiff(m1, m2) {
@@ -70,4 +119,30 @@ function moriDiff(m1, m2) {
             : mori.mutable.assoc(tm, k, v1);
     }, mori.mutable.thaw(mori.hashMap()), m1);
     return mori.mutable.freeze(m);
+}
+
+function moriReduceDiff(m1, m2, acc, {
+    remove = (k, v, acc) => acc,
+    change = (k, oldV, newV, acc) => acc,
+    add = (k, v, acc) => acc, }) {
+
+    acc = mori.reduceKV(
+        (acc, k, v1) => {
+            const v2 = mori.get(m2, k);
+            return v2 === undefined ? remove(k, v1, acc) : acc;
+        }, acc, m1);
+
+    acc = mori.reduceKV(
+        (acc, k, v2) => {
+            const v1 = mori.get(m1, k);
+            if (v1 === undefined) {
+                return add(k, v2, acc);
+            } else if (v1 !== v2) {
+                return change(k, v1, v2, acc);
+            } else {
+                return acc;
+            }
+        }, acc, m2);
+
+    return acc;
 }

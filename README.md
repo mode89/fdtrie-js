@@ -77,36 +77,46 @@ npm run bench
 
 Results:
 ```
-CPU: Intel Core i7-8700K
-RAM: 32 GB
-Ubuntu 18.04
-Node v16.17.0
+CPU: Intel Core i5-9400F
+RAM: 16 GB
+Linux kernel: 5.19.12
+Node v18.10.0
 
 Associate a key with a value
-  PHashMap:      52 ms
-  ImmutableJS:   56 ms
-  Mori:          54 ms
-  Native:        7 ms
+  PHashMap: 51 ms
+  ImmutableJS: 51 ms
+  Mori: 49 ms
+  Native: 8 ms
 
 Get a value by a key
-  PHashMap:      9 ms
-  ImmutableJS:   11 ms
-  Mori:          8 ms
-  Native:        1 ms
+  PHashMap: 13 ms
+  ImmutableJS: 12 ms
+  Mori: 8 ms
+  Native: 1 ms
 
 Delete a key
-  PHashMap:      48 ms
-  ImmutableJS:   55 ms
-  Mori:          54 ms
-  Native:        0 ms
+  PHashMap: 48 ms
+  ImmutableJS: 49 ms
+  Mori: 54 ms
+  Native: 0 ms
 
 Single key difference
-  PHashMap:      1 us
-  ImmutableJS:   8182 us
-  Mori:          6798 us
+  PHashMap: 949 ns
+  ImmutableJS: 8545869 ns
+  Mori: 5904032 ns
 
 All keys difference
-  PHashMap:      13 ms
-  ImmutableJS:   46 ms
-  Mori:          29 ms
+  PHashMap: 10 ms
+  ImmutableJS: 43 ms
+  Mori: 27 ms
+
+Reduce difference (single key)
+  PHashMap: 458 ns
+  ImmutableJS: 18070695 ns
+  Mori: 11168898 ns
+
+Reduce difference (all keys)
+  PHashMap: 7 ms
+  ImmutableJS: 23 ms
+  Mori: 15 ms
 ```

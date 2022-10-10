@@ -34,6 +34,7 @@ function unitsMultiplier(units) {
     switch (units) {
     case "ms": return 1000;
     case "us": return 1000000;
+    case "ns": return 1000000000;
     default: throw "Unknown type of units: " + units;
     }
 }
