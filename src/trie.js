@@ -415,15 +415,6 @@ export class CollisionNode {
                 onAdded,
                 (oldE, newE, acc) => onChanged(newE, oldE, acc),
                 onRemoved);
-        } else if (other instanceof CollisionNode
-                   && this.keyHash !== other.keyHash) {
-            this.forEach(e => {
-                acc = onRemoved(e, acc);
-            });
-            other.forEach(e => {
-                acc = onAdded(e, acc);
-            });
-            return acc;
         } else {
             this.forEach(thisE => {
                 const otherE = other.getEntry(
