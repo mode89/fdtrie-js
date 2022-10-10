@@ -88,12 +88,12 @@ export class PHashMap {
 
     reduceDifference(other, acc,
         {
-            onRemoved = (e, acc) => acc,
-            onChanged = (oldE, newE, acc) => acc,
-            onAdded = (e, acc) => acc,
+            remove = (e, acc) => acc,
+            change = (oldE, newE, acc) => acc,
+            add = (e, acc) => acc,
         }) {
         return reduceDifference(
-            this.root, other.root, acc, 0, onRemoved, onChanged, onAdded);
+            this.root, other.root, acc, 0, remove, change, add);
     }
 
     seq() {
