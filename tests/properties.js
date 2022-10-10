@@ -3,6 +3,9 @@ import _ from "lodash";
 import {PHashMap} from "map.js";
 import * as utils from "utils.js";
 
+const NUM_RUNS = 1000;
+const SIZE = "medium";
+
 test("build", () => fc.assert(
     fc.property(
         genOpsAndKeys(),
@@ -14,7 +17,7 @@ test("build", () => fc.assert(
                 ops, PHashMap.blank(testKeyHasher));
             expectSimilar(m, pm, keys);
         }),
-    { numRuns: 1000 }
+    { numRuns: NUM_RUNS }
 ));
 
 test("difference", () => fc.assert(
@@ -36,7 +39,7 @@ test("difference", () => fc.assert(
                 pm2.difference(pm1),
                 keys);
         }),
-    { numRuns: 1000 }
+    { numRuns: NUM_RUNS }
 ));
 
 test("entries", () => fc.assert(
@@ -54,7 +57,7 @@ test("entries", () => fc.assert(
             entries.sort(compare);
             expect(entries).toEqual(kvs);
         }),
-    { numRuns: 1000 }
+    { numRuns: NUM_RUNS }
 ));
 
 test("hash", () => fc.assert(
@@ -65,7 +68,7 @@ test("hash", () => fc.assert(
             expect(h).toBeGreaterThanOrEqual(-0x80000000);
             expect(h).toBeLessThanOrEqual(0x7FFFFFFF);
         }),
-    { numRuns: 10000 }
+    { numRuns: NUM_RUNS }
 ));
 
 function makePHashMapFromMap(m, keyHasher) {
@@ -171,7 +174,7 @@ function genOpsAndKeys() {
 }
 
 function genOps(keys, values) {
-    return fc.array(genOp(keys, values), {size: "medium"});
+    return fc.array(genOp(keys, values), {size: SIZE});
 }
 
 function genOp(keys, values) {
@@ -197,10 +200,10 @@ function genDissocOp(keys) {
 
 function genKeys() {
     const keyValues = fc.array(
-        genObject(), {minLength: 1, size: "medium"})
+        genObject(), {minLength: 1, size: SIZE})
         .map(vs => _.uniqBy(vs, JSON.stringify));
     const hashes = fc.uniqueArray(
-        fc.integer(), {minLength: 2, size: "medium"});
+        fc.integer(), {minLength: 2, size: SIZE});
     return keyValues.chain(
         vs => hashes.chain(
             hs => {
@@ -231,7 +234,7 @@ function genValues() {
                 ),
             ]
         }),
-        {minLength: 1, size: "medium"});
+        {minLength: 1, size: SIZE});
 }
 
 function genObject() {
