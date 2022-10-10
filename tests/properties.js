@@ -1,6 +1,7 @@
 import * as fc from "fast-check";
 import _ from "lodash";
 import {PHashMap} from "map.js";
+import stringify from "safe-stable-stringify";
 import * as utils from "utils.js";
 
 const NUM_RUNS = 1000;
@@ -51,10 +52,8 @@ test("entries", () => fc.assert(
                 PHashMap.blank(testKeyHasher));
             const entries = Array.from(m.entries())
                 .map(e => [e.key, e.value]);
-            const compare =
-                (a, b) => JSON.stringify(a) < JSON.stringify(b) ? -1 : 1;
-            kvs.sort(compare);
-            entries.sort(compare);
+            kvs.sort(compareByStringify);
+            entries.sort(compareByStringify);
             expect(entries).toEqual(kvs);
         }),
     { numRuns: NUM_RUNS }
@@ -201,7 +200,7 @@ function genDissocOp(keys) {
 function genKeys() {
     const keyValues = fc.array(
         genObject(), {minLength: 1, size: SIZE})
-        .map(vs => _.uniqBy(vs, JSON.stringify));
+        .map(vs => _.uniqBy(vs, stringify));
     const hashes = fc.uniqueArray(
         fc.integer(), {minLength: 2, size: SIZE});
     return keyValues.chain(
@@ -243,4 +242,8 @@ function genObject() {
 
 function testKeyHasher(key) {
     return key.hash;
+}
+
+function compareByStringify(a, b) {
+    return stringify(a) < stringify(b) ? -1 : 1;
 }
