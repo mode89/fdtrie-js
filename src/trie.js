@@ -64,23 +64,23 @@ export class Entry {
         }
     }
 
-    reduceDifferenceImpl(other, acc, shift, onRemoved, onChanged, onAdded) {
+    reduceDifferenceImpl(other, acc, shift, remove, change, add) {
         if (other instanceof Entry) {
             if (this.keyHash === other.keyHash) {
                 if (utils.equal(this.key, other.key)) {
                     if (this.value !== other.value) {
-                        return onChanged(this, other, acc);
+                        return change(this, other, acc);
                     } else {
                         return acc;
                     }
                 } else {
-                    acc = onRemoved(this, acc);
-                    acc = onAdded(other, acc);
+                    acc = remove(this, acc);
+                    acc = add(other, acc);
                     return acc;
                 }
             } else {
-                acc = onRemoved(this, acc);
-                acc = onAdded(other, acc);
+                acc = remove(this, acc);
+                acc = add(other, acc);
                 return acc;
             }
         } else {
@@ -90,17 +90,17 @@ export class Entry {
                     if (utils.equal(this.key, otherE.key)) {
                         otherHasThisKey = true;
                         if (this.value !== otherE.value) {
-                            acc = onChanged(this, otherE, acc);
+                            acc = change(this, otherE, acc);
                         }
                     } else {
-                        acc = onAdded(otherE, acc);
+                        acc = add(otherE, acc);
                     }
                 } else {
-                    acc = onAdded(otherE, acc);
+                    acc = add(otherE, acc);
                 }
             });
             if (!otherHasThisKey) {
-                acc = onRemoved(this, acc);
+                acc = remove(this, acc);
             }
             return acc;
         }
@@ -273,21 +273,18 @@ export class ArrayNode {
         }
     }
 
-    reduceDifferenceImpl(other, acc, shift, onRemoved, onChanged, onAdded) {
+    reduceDifferenceImpl(other, acc, shift, remove, change, add) {
         if (other instanceof ArrayNode) {
             for (let i = 0; i < 32; i ++) {
                 const thisC = this.children[i];
                 const otherC = other.children[i];
                 acc = reduceDifference(thisC, otherC, acc, shift + 5,
-                    onRemoved, onChanged, onAdded);
+                    remove, change, add);
             }
             return acc;
         } else {
-            return other.reduceDifferenceImpl(
-                this, acc, shift,
-                onAdded,
-                (oldE, newE, acc) => onChanged(newE, oldE, acc),
-                onRemoved);
+            return other.reduceDifferenceImpl(this, acc, shift,
+                add, (oldE, newE, acc) => change(newE, oldE, acc), remove);
         }
     }
 
@@ -408,28 +405,25 @@ export class CollisionNode {
         }
     }
 
-    reduceDifferenceImpl(other, acc, shift, onRemoved, onChanged, onAdded) {
+    reduceDifferenceImpl(other, acc, shift, remove, change, add) {
         if (other instanceof Entry) {
-            return other.reduceDifferenceImpl(
-                this, acc, shift,
-                onAdded,
-                (oldE, newE, acc) => onChanged(newE, oldE, acc),
-                onRemoved);
+            return other.reduceDifferenceImpl(this, acc, shift,
+                add, (oldE, newE, acc) => change(newE, oldE, acc), remove);
         } else {
             this.forEach(thisE => {
                 const otherE = other.getEntry(
                     shift, thisE.keyHash, thisE.key);
                 if (otherE === undefined) {
-                    acc = onRemoved(thisE, acc);
+                    acc = remove(thisE, acc);
                 }
             });
             other.forEach(otherE => {
                 const thisE = this.getEntry(
                     shift, otherE.keyHash, otherE.key);
                 if (thisE === undefined) {
-                    acc = onAdded(otherE, acc);
+                    acc = add(otherE, acc);
                 } else if (thisE.value !== otherE.value) {
-                    acc = onChanged(thisE, otherE, acc);
+                    acc = change(thisE, otherE, acc);
                 }
             });
             return acc;
@@ -475,19 +469,19 @@ function differenceToEntry(rNode, lEntry, shift) {
 }
 
 export function reduceDifference(
-    lNode, rNode, acc, shift, onRemoved, onChanged, onAdded) {
+    lNode, rNode, acc, shift, remove, change, add) {
     if (lNode !== rNode) {
         if (rNode === undefined) {
             lNode.forEach(e => {
-                acc = onRemoved(e, acc);
+                acc = remove(e, acc);
             });
         } else if (lNode === undefined) {
             rNode.forEach(e => {
-                acc = onAdded(e, acc);
+                acc = add(e, acc);
             });
         } else {
             return lNode.reduceDifferenceImpl(
-                rNode, acc, shift, onRemoved, onChanged, onAdded);
+                rNode, acc, shift, remove, change, add);
         }
     }
     return acc;
